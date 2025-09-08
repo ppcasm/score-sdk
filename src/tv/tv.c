@@ -179,6 +179,39 @@ void tv_printcolor(unsigned short *fb, unsigned int x, unsigned int y, const cha
 }
 
 // =============================================================
+//  void tv_printcolor(unsigned short *fb, unsigned int x, unsigned int y, 
+//                     const char *text, unsigned short fgcolor, unsigned short bgcolor)
+//
+//  Print to TV screen via low level framebuffer access, with foreground
+//  and background color
+// =============================================================
+void tv_printcolor(unsigned short *fb, unsigned int x, unsigned int y, 
+                   const char *text, unsigned short fgcolor, unsigned short bgcolor) 
+{
+    short xx, yy;
+
+    while (*text) 
+    {
+        for (yy = 0; yy < 16; yy++) 
+        {
+            for (xx = 0; xx < 8; xx++)
+            {
+                // Check the bit in the font
+                if (font[(*text) * 16 + yy] & (1 << (8 - xx))) {
+                    // Foreground pixel
+                    fb[(y * 16 + yy) * 640 + (x * 8 + xx)] = fgcolor;
+                } else {
+                    // Background pixel
+                    fb[(y * 16 + yy) * 640 + (x * 8 + xx)] = bgcolor;
+                }
+            }
+        }
+        x++;
+        text++;
+    }
+}
+
+// =============================================================
 // void tv_printhex(unsigned int x, unsigned int y, unsigned char *text)
 // 
 // Print hex value to TV screen via low level framebuffer access
