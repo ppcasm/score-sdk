@@ -86,6 +86,12 @@ void iso_close_callback(int filedes) {
 }
 
 int main(){
+	
+	while(1) {
+	    uart_print_string("TESTING\n");
+	}
+	
+	/*
 	int i = 0;	
 		
 	//uart_print_string("STARTED\n");
@@ -209,6 +215,6 @@ int main(){
 		
 	void (*entry_start)(void) = (void *)0xA0001000;
 	entry_start();
-
+    */
 return 0;
 }

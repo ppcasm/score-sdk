@@ -2,7 +2,7 @@
 # WARNING: DO NOT EDIT OR DELETE THIS WORKSPACE FILE!
 
 Body_Name = "SPG290"
-Probe_Name = "Auto"
+Probe_Name = "USB_Probe_First"
 Active_Project = "hyperscan"
 
 ####################################################################################################

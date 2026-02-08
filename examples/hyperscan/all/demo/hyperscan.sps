@@ -55,7 +55,7 @@ Remote_Device = COM1
 BOOL_CUSTOM_CMD = 0
 STR_CUSTOM_CMD = 
 Parallel = LPT1
-Device = Simulator
+Device = Ice
 TCP_Address = 
 TCP_Port = 
 Serial_Device = 
@@ -244,7 +244,7 @@ PARAM=
 #PROP Default_Filter = 
 
 # Begin Source File
-SOURCE=..\..\..\..\src\ppu\ppu_control.c
+SOURCE=..\..\..\..\src\ppu\ppu.c
 USEPARAM=FALSE
 PARAM=
 # End Source File

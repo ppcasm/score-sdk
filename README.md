@@ -24,6 +24,9 @@ SPG29x specific:
 - Basic TVE/Framebuffer
 - Custom interrupt handling
 
+MGA BratzLife:
+- Code loading from SD card on unmodified console, with examples
+
 More will hopefully be added in the future..
 
 # Features

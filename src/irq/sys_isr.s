@@ -292,6 +292,7 @@ intmsg:
 	
 .extern irq_dispatch    // irq_dispatch from sys_irq.c
 .set r1
+
 //=========================================================
 // void save_reg(void)
 // Save all registers and jump to interrupt label table
@@ -301,84 +302,6 @@ intmsg:
 //=========================================================
 save_reg:
 	// Save registers
-	subi SP, 38*4
-    sw r1,  [SP, 1*4]
-    sw r2,  [SP, 2*4]
-    sw r3,  [SP, 3*4]
-    sw r4,  [SP, 4*4]
-    sw r5,  [SP, 5*4]
-    sw r6,  [SP, 6*4]
-    sw r7,  [SP, 7*4]
-    sw r8,  [SP, 8*4]
-    sw r9,  [SP, 9*4]
-    sw r10, [SP, 10*4]
-    sw r11, [SP, 11*4]
-    sw r12, [SP, 12*4]
-    sw r13, [SP, 13*4]
-    sw r14, [SP, 14*4]
-    sw r15, [SP, 15*4]
-    sw r16, [SP, 16*4]
-    sw r17, [SP, 17*4]
-    sw r18, [SP, 18*4]
-    sw r19, [SP, 19*4]
-    sw r20, [SP, 20*4]
-    sw r21, [SP, 21*4]
-    sw r22, [SP, 22*4]
-    sw r23, [SP, 23*4]
-    sw r24, [SP, 24*4]
-    sw r25, [SP, 25*4]
-    sw r26, [SP, 26*4]
-    sw r27, [SP, 27*4]
-    sw r28, [SP, 28*4]
-    sw r29, [SP, 29*4]
-    sw r30, [SP, 30*4]
-    sw r31, [SP, 31*4]
-    mfcr    r13, cr1
-    mfcr    r15, cr5
-    sw r13, [SP, 33*4]
-    sw r15, [SP, 35*4]
-
-    mfcr    r4, cr2
-    jl	irq_dispatch
-    
-    lw r1,  [SP, 1*4]
-    lw r2,  [SP, 2*4]
-    lw r3,  [SP, 3*4]
-    lw r4,  [SP, 4*4]
-    lw r5,  [SP, 5*4]
-    lw r6,  [SP, 6*4]
-    lw r7,  [SP, 7*4]
-    lw r8,  [SP, 8*4]
-    lw r9,  [SP, 9*4]
-    lw r10, [SP, 10*4]
-    lw r11, [SP, 11*4]
-    lw r12, [SP, 12*4]
-    lw r13, [SP, 13*4]
-    lw r14, [SP, 14*4]
-    lw r15, [SP, 15*4]
-    lw r16, [SP, 16*4]
-    lw r17, [SP, 17*4]
-    lw r18, [SP, 18*4]
-    lw r19, [SP, 19*4]
-    lw r20, [SP, 20*4]
-    lw r21, [SP, 21*4]
-    lw r22, [SP, 22*4]
-    lw r23, [SP, 23*4]
-    lw r24, [SP, 24*4]
-    lw r25, [SP, 25*4]
-    lw r26, [SP, 26*4]
-    lw r27, [SP, 27*4]
-    lw r28, [SP, 28*4]
-    lw r29, [SP, 29*4]
-    lw r30, [SP, 30*4]
-    lw r31, [SP, 31*4]
-	lw r30, [SP, 33*4]
-    lw r31, [SP, 35*4]
-    mtcr    r30, cr1
-    mtcr    r31, cr5
-    addi	SP, 38*4
-    rte
-/*
     subi SP, 0x98
     sw r1,  [SP, 0x4]
     sw r2,  [SP, 0x8]
@@ -500,4 +423,3 @@ save_reg:
     rte
 	nop
 	nop
-*/

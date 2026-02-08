@@ -15,7 +15,11 @@ This is a basic canvas to start your HyperScan project. Check around for documen
 #include "hyperscan/hyperscan.h"
 #include "hyperscan/hs_controller/hs_controller.h"
 
+void isrstuff(void) {
+}
+
 int main(){
+	attach_isr(30, isrstuff);
 	
 	// Stupid framebuffer for now
 	unsigned short *fb = (unsigned short *) 0xA0400000;

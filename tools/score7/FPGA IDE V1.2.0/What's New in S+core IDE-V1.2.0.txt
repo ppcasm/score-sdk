@@ -1,0 +1,8 @@
+What's New in S+core IDE-V1.2.0
+
+1. thread-safe version newlib.
+2. humanization user interface. --Microsoft Visual Studio.NET 2005 look and feel. 
+3. Simulator Devive support LCD and UART, Support printf to output window.
+4. Support add Resources to project, and specify address.
+5. Enter debug mode without download or parse debug information.
+6. Support Function browser at debug mode.

@@ -316,7 +316,7 @@ PARAM=
 #PROP Default_Filter = 
 
 # Begin Source File
-SOURCE=..\..\..\..\include\irq\intenable.h
+SOURCE=..\..\..\..\include\irq\interrupts.h
 USEPARAM=FALSE
 PARAM=
 # End Source File

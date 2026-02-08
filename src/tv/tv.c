@@ -30,6 +30,13 @@ void tv_clearscreen(unsigned short *fb){
 //
 //	void return
 // =============================================================
+// P_PPU_Control
+#define PPU_QVGA		0x00000000
+#define PPU_VGA			0x00000001
+#define PPU_HVGA		0x00000002
+#define PPU_VGA2CIF		0x00000003
+#define PPUEN			0x00001000
+
 void tv_init(unsigned int resolution, unsigned int colormode, unsigned int fb1_addr, unsigned int fb2_addr, unsigned int fb3_addr){
 	*P_TV_CLK_CONF = C_TV_CLK_EN | C_TV_RST_DIS; 	
 	*P_TV_VIDEODAC_CTRL = C_TV_VIDEODAC_EN; 
@@ -40,7 +47,7 @@ void tv_init(unsigned int resolution, unsigned int colormode, unsigned int fb1_a
 					| C_TV_LITTLE_ENDIAN
 					| C_TV_VBLANKINGSINT_EN; 	
 
-	*(volatile unsigned int *)0x88010000 |= 0x0001;
+	*(volatile unsigned int *)0x88010000 = PPUEN;
 	if(resolution == RESOLUTION_640_480){
 		*P_TV_MODE_CTRL |= C_TV_VGA_MODE;
 	}

@@ -1,0 +1,205 @@
+S+coreIDE-V1.2.0	-2005/07/14
+-Modify	  : make.exe changed.
+-Modify	  : compiler changed.
+            newlib ( thread-safe version)
+            score-linux-elf-gcc  ( gcc version 3.4.2-Sunplus-0.9.3.2-Jul 13 2005 )
+            binutils (2.13.2.1-Sunplus-0.9.32-Jul-13-2005)
+
+S+coreIDE-V1.1.9.1	-2005/07/11
+-Modify	  : update ice driver.
+-add      : add register LIMPFN and LDMPFN.
+
+S+coreIDE-V1.1.9.0	-2005/07/05
+-Modify	  : compiler changed.
+            score-linux-elf-gcc  ( gcc version 3.4.2-Sunplus-0.9.3.2-Jun  30 2005 )
+            binutils (2.13.2.1-Sunplus-0.9.32-June-30-2005)
+
+            1. gcc : bug fix : double/long long pre/post inc/desc addressing mode error
+            2. newlib : 2005.06.27 --- 1.modified ./newlib/libm/math/e_pow.c 
+                                                  ./newlib/libm/math/w_pow.c
+            Because pow function is different with linux library on some case,
+                 I make them as same.
+
+-Modify	  : update ice/sim driver and DSR, score_sn_r20050703.
+-Modify	  : reduce debug window refresh.
+-Modify	  : spg290/300 virtual memory changed.
+
+S+coreIDE-V1.1.1.0	-2005/06/16
+-add      : makefile contain IDE version information.
+-Modify	  : compiler changed.
+            score-linux-elf-gcc  ( gcc version 3.4.2-Sunplus-0.9.3.1-Jun  15 2005 )
+            binutils (2.13.2.1-Sunplus-0.9.32-June-15-2005)
+	      1. add relocation boundary error message in linker .
+	      2. this version of newlib is thread-safe version
+
+S+coreIDE-V1.1.0.6	-2005/06/13
+-Modify   :Instruction breakpoint.
+-Modify   :Download progress dialog.
+
+S+coreIDE-V1.1.0.5	-2005/06/07
+-Add      : mouse on TabWindow,show file pathname.
+-Modify	  : compiler changed.
+-----------------------------------------------------------------------
+  gnu_v0931.0606 toolset release    2005/06/06
+-----------------------------------------------------------------------
+    support newlib 
+    support new version of simulator and ice driver
+    score-linux-elf-gcc  ( gcc version 3.4.2-Sunplus-0.9.3.1-Jun  6 2005 )
+    binutils (2.13.2.1-Sunplus-0.9.30-June-06-2005)
+
+S+coreIDE-V1.1.0.4	-2005/06/06
+-Add      : register variable can modify in watch.
+
+S+coreIDE-V1.1.0.3	-2005/05/25
+-Add      : Simulator UART Printf.
+            Project->Setting->Simulator Setting add "Peripheral equipments".UART defualt OFF.
+-Add	  : Project->Setting->General->Generate add "Ld File" checkbox.
+-Add      : Resources' address and section can specified.
+-Add      : asm file keyword.
+-Add      : Load File to Memory speed up.
+-Add      : show code Size/Rom/Ram in Output window after build.
+-Add      : watch register variable.
+-Add      : Enter debug mode button.
+-Add      : Work space file view -> Add Folders to Folder.
+-Add      : Exception Break or not.
+            Project setting-> General -> Exception break
+-Add      : Source file map(replace path)
+            Project setting-> General -> Advanced
+
+-Modify	  : compiler changed.
+            The difference of the version of tool( gnu_v0930_0524) with the last tool release ( gnu_v0930_0429)
+            is  asw/alw can't be used in score5u .
+-Modify	  : makefile link option, generate Obj.lst for each project.
+
+S+coreIDE-V1.1.0.2	-2005/05/09
+-Modify	  : update ice/sim driver and DSR.
+-Modify	  : close button on LCD window availability.
+
+S+coreIDE-V1.1.0.1	-2005/04/10
+-Modify	  : BCG7.3 SmartDocking ControlBar.
+            -- Microsoft Visual Studio.NET 2005 look and feel.
+            MFC71 --Microsoft Visual Studio.NET 2003
+-Add	  : Resource View.
+-Add	  : Project->Setting->General->Generate add "Resource File" checkbox.
+-Add	  : Project->Setting->Simulator Setting add "Peripheral equipments".Lcd defualt OFF.
+-Add	  : when new *.h file,will write "#ifndef #define #endif" for user.
+
+-Modify	  : SetFocus to "CPU is running",user can break by Keyboard.
+            SetFocus to DownLoad Progessbar,user can break by Keyboard.
+-Modify	  : Memory window show ToolBar Defualt.
+-Modify	  : Local variable window and callstack window's context menu beautified.
+-Modify	  : Full Screen state,application look optimize.
+
+-Bug Fix  : Disassembly "Dump contents to File" memory leak.
+-Bug Fix  : ProperSheet pushpin hang.
+-Bug Fix  : Find in files on Binary file,hang.
+
+S+coreIDE-V1.0.0.0	-2005/03/15
+-Modify	  : Fix some bugs in Debug and UI.
+-Modify   : Little Endian Memory Display.
+-Modify   : UI in Data Breakpoint Window.
+-Modify   : The speed of dump has been increased.
+-Modify   : Download Sections according to SEC_LOAD.
+
+S+coreIDE-V0.9.2.2	-2005/03/04
+-Modify	  : Fix some bugs in Debug and UI.
+-Add      : Support ISA SCORE5U.
+-Modify   : Debug Service Routine for ICE.
+
+S+coreIDE-V0.9.2.1	-2005/02/24
+-Modify	  : Fix some bugs in Step and Breakpoint.
+-Modify   : Fix some bugs in UI.
+
+S+coreIDE-V0.9.2	-2005/02/18
+-Modify	  : Speed in ICE is increased.
+-Modify   : Modification in Step and Breakpoint.
+-Modify   : Updated Profile.
+-Add	  : Do more step while the program is stopped at main.
+
+S+coreIDE-V0.9.1	-2005/01/31
+-Modify	  : Step is modified for recursive functions.
+-Add	  : Dump contents of Disassembly Window to file.
+-Add      : Reset registers and redownload .data section while restart.
+-Add      : Output Exception information.
+-Modify	  : The way to enter address in Memory Window.
+-Modify	  : Fix some bugs in UI.
+-Add      : Debug Level Option is temporarily added for ICE testing.
+-Add      : checkInstance mechanism is added to solve ICE Hang problems caused by no power.
+-Modify   : Developed stabs information parsing.
+
+S+coreIDE-V0.9.0	-2005/01/19
+-Modify	  : Step Into and Step Over while Exception Routine Debugging is selected.
+-Modify	  : Endian in AutoDump -- Big Endian Simulator -- Download Binary Data from file.
+-Modify   : Block Stabs Information.
+-Modify   : Edit Window Refresh.
+-Add      : Properties Menu is added to show the file's information.
+
+S+coreIDE-V0.8.0	-2005/01/17
+-Add	  : Default setting in Profile and result in HTML.
+-Modify	  : Simulator Setting and Simulator Memory Setting related with ICE\Simulator Mode.
+-Modify	  : Register Window -- TLB, COP, Special Registers.
+-Modify	  : AutoDump without stop.
+-Modify	  : Download Command File.
+-Modify	  : Debug in Little Endian ICE.
+-Modify	  : New method in parsing type information in stabs.
+-Add	  : Add Properties Menu to show the file's path and time.
+-Modify   : Compiler has been changed and some flags also has been changed.
+-Modify   : Fix some bugs in breakpoint and Breakpoint UI has been changed a little.
+
+S+coreIDE-V0.7.0	-2004/12/31
+-Add      : C Level Profile.
+-Modify   : Open some Compiler Settings for user to modify.
+-Add      : Support choosing whether there are COP1\2\3 in Simulator.
+-Add      : CheckSum.
+-Add      : TLB Log Entry in Body.
+-Modify   : Simulator Memory Setting.
+-Modify   : New Probe Exception.
+-Bug Fix  : Memory Leak in some programs.
+
+S+coreIDE-V0.6.0	-2004/12/24
+-Add      : Support watching string in Watch Window.
+-Modify   : ROM Debug.
+-Add	  : Additional operation for Instruction Breakpoint.
+-Modify   : Data Breakpoint operation.
+-Modify   : Bit-16 Instructions in Disassembly Window.
+-Modify   : Software Breakpoint in Disassembly Window.
+-Modify   : Save related path in .opt and .dgs.
+-Modify   : Watch Window Refresh.
+-Modify   : Variables in CallStack Window.
+
+S+coreIDE-V0.5.0	-2004/12/17
+
+-Add      : Menu :Show Callstack Window.
+-Add      : Register window --TLB Page, Move COP0 to General Page
+-Modify   : Add tip to Memory Filling Dialog: (Default : Decimal)
+-Modify   : Disassembly window. Instruction update.
+-Modify   : Instruction breakpoint. Default Setting affect Advanced Setting.
+-Modify   : Support Main program debugging information only, and additional program not.
+-Modify   : Startup address = entry point address.
+-Modify   : Local Variable Window has been modified to show local variables in the Function level block
+-Modify   : Breakpoint Count
+-Modify   : Step Into has been modified for Callstack
+-Modify	  : Data Breakpoint Window UI
+
+------------------------------------------------------------------
+S+coreIDE-V0.4.0	-2004/12/13
+
+-Add      : Local Variable Window
+-Add      : Instuction level Profile.text mode out/HTML mode out
+-Add      : Callstack Window
+-Add      : Pre-Load View checkbox
+-Add      : Simulitor Setting Tree
+-Add      : Pre-Link and Post-Build
+-Add      : Generate File
+		-Makefile
+		-Disassembly File
+		-Symbol File
+-Add      : Watch Tips
+-Add      : Drop to watch and Add to Watch
+-Add      : Open a file based on the selected text
+-Add      : Edit Assist Toolbar and  Auto Indent
+-Add	  : Conditional Breakpoint
+
+-Modify   : Step Into¡¢Step Out¡¢Step Over¡¢Run to Cursor
+-Modify   : Breakpoint Window
+-Modify   : Disassembly Window
