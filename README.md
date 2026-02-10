@@ -22,8 +22,8 @@ support for additional SPG29x consoles (e.g. Zone3D).
 - [SDK Installation](#sdk-installation)
 - [Building & Running Examples](#building--running-examples)
 - [Platform-Specific Documentation](#platform-specific-documentation)
-  - [Mattel HyperScan](#mattel-hyperscan)
-  - [MGA BratzLife](#mga-bratzlife)
+  - [Mattel HyperScan](documentation/hyperscan/README.md)
+  - [MGA BratzLife](documentation/bratzlife/README.md)
 - [Starting New Projects](#starting-new-projects)
 - [Thanks To](#thanks-to)
 - [License](#license)
@@ -50,8 +50,8 @@ existing ones.
 
 | Platform | Status | Notes |
 |--------|--------|-------|
-| **Mattel HyperScan** | ✅ Supported | CD, UART, USB booting, custom firmware |
-| **MGA BratzLife** | ✅ Supported | SD-based loading on unmodified hardware |
+| **Mattel HyperScan**(documentation/hyperscan/README.md) | ✅ Supported | CD, UART, USB booting, custom firmware |
+| **MGA BratzLife**(documentation/bratzlife/README.md) | ✅ Supported | SD-based loading on unmodified hardware |
 | **Zone3D** | ⏳ Planned | Structure in place, support coming later |
 
 ---
