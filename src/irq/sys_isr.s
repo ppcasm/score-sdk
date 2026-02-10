@@ -267,6 +267,37 @@ int62_vec:              // IRQ62
 int63_vec:              // IRQ63
     j save_reg          // save_reg
 
+//=========================================================
+// MGA BratzLife hack
+// This should be fine to compile with all other systems
+//
+// The BratzLife loader has a critical flaw in that it copies
+// the payload from SD card from address 0xA00001FC to past
+// entry address of 0xA0001000. The problem with this is that
+// the loader they're doing the copy from is stored at
+// 0xA0000310. I was going to make it a linkerscript hack but
+// decided that it's probably easiest to just add it here since
+// it will live in the intvec handling area anyway and will just
+// be cooked into all binaries since the area is used anyway and
+// would otherwise be filled with 0x00 values. 
+//
+// This hack works by simply replicating the loader bytes at the fixed
+// address so that when it does go to self modify, it is just copying the
+// same bytes at the same location so the load can finish properly.
+
+// My guess is that they didn't notice this was even happening because they
+// likely kept uploading the same code with that loader at that same
+// fixed address.
+//
+//
+//=========================================================
+bratzlife_fix:
+.byte 0x30, 0x52, 0x15, 0x00, 0xb0, 0x89, 0x4f, 0x01, 0x84, 0x5d, 0x06, 0xa5, 0x14, 0x5d, 0x75, 0x11 
+.byte 0x00, 0x80, 0x18, 0x85, 0x00, 0x80, 0x00, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+.byte 0x00, 0x80, 0x00, 0x80, 0x00, 0xc0, 0x1a, 0x95, 0xf8, 0x83, 0x14, 0x85, 0x10, 0x94, 0x28, 0x81
+.byte 0x0b, 0x80, 0x44, 0x9d, 0x0f, 0x80, 0x48, 0x9d, 0x93, 0x28, 0xfb, 0x47, 0x00, 0x00, 0x00, 0x00
+.byte 0x00, 0x80, 0x00, 0x80, 0x00, 0xc0, 0x5a, 0x95, 0x00, 0xa0, 0x54, 0x85, 0x08, 0xbc, 0x0a, 0x80
+
 .extern intmsg          // intmsg from sys_irq.c
 //=========================================================
 // IRQ SVC
@@ -423,3 +454,11 @@ save_reg:
     rte
 	nop
 	nop
+
+.text
+.global invalid_cache
+invalid_cache:
+	cache 0x18, [r4,0]
+	br r3	
+	
+

@@ -39,15 +39,13 @@ void tv_clearscreen(unsigned short *fb){
 
 void tv_init(unsigned int resolution, unsigned int colormode, unsigned int fb1_addr, unsigned int fb2_addr, unsigned int fb3_addr){
 	*P_TV_CLK_CONF = C_TV_CLK_EN | C_TV_RST_DIS; 	
-	*P_TV_VIDEODAC_CTRL = C_TV_VIDEODAC_EN; 
+	
 	*P_TV_MODE_CTRL = C_TV_CTRL_EN 			
 					| C_TV_NTSC_MODE 				
 					| C_TV_INTERLACE_MODE 
 					| C_TV_NTSC_TYPE 		
-					| C_TV_LITTLE_ENDIAN
-					| C_TV_VBLANKINGSINT_EN; 	
+					| C_TV_LITTLE_ENDIAN;	
 
-	*(volatile unsigned int *)0x88010000 = PPUEN;
 	if(resolution == RESOLUTION_640_480){
 		*P_TV_MODE_CTRL |= C_TV_VGA_MODE;
 	}
@@ -218,11 +216,9 @@ void tv_printhex(unsigned short *fb, unsigned int x, unsigned int y, unsigned lo
 //
 //	void return
 //==============================================================
-void tv_fadeout(void)    
-{
+void tv_fadeout(void) {
 	unsigned int i, j;
-	for(i=0; i<256; i++)
-	{
+	for(i=0; i<256; i++) {
 		tv_fade(i);
 		for(j=0; j<1024*6; j++);
 	}
@@ -235,12 +231,76 @@ void tv_fadeout(void)
 //
 //	void return
 //==============================================================
-void tv_fadein(void)     
-{
+void tv_fadein(void) {
 	unsigned int i, j;
-	for(i=0; i<256; i++)
-	{
+	for(i=0; i<256; i++) {
 		tv_fade(255-i);
 		for(j=0; j<1024*8; j++);
 	}
 }
+
+static char hex_digit(unsigned long v) {
+    v &= 0xFu;
+    return (v < 10u) ? (char)('0' + v) : (char)('A' + (v - 10u));
+}
+
+void tv_hex_dump(
+    unsigned short *fb,
+    unsigned int x,
+    unsigned int y,
+    const void *data,
+    unsigned int len
+) {
+    const unsigned char *p = (const unsigned char *)data;
+
+    char line[80];
+    unsigned int offset = 0;
+    unsigned int row = 0;
+
+    while (offset < len) {
+        char *out = line;
+
+        /* ---- Offset ---- */
+        *out++ = hex_digit(offset >> 12);
+        *out++ = hex_digit(offset >> 8);
+        *out++ = hex_digit(offset >> 4);
+        *out++ = hex_digit(offset >> 0);
+        *out++ = ':';
+        *out++ = ' ';
+
+        /* ---- Hex Bytes ---- */
+        unsigned int i;
+        for (i = 0; i < 16; i++) {
+            if (offset + i < len) {
+                unsigned char b = p[offset + i];
+                *out++ = hex_digit(b >> 4);
+                *out++ = hex_digit(b);
+            } else {
+                *out++ = ' ';
+                *out++ = ' ';
+            }
+            *out++ = ' ';
+        }
+
+        /* ---- ASCII ---- */
+        *out++ = ' ';
+        *out++ = '|';
+
+        for (i = 0; i < 16 && offset + i < len; i++) {
+            unsigned char c = p[offset + i];
+            if (c >= 0x20 && c <= 0x7E)
+                *out++ = (char)c;
+            else
+                *out++ = '.';
+        }
+
+        *out++ = '|';
+        *out++ = '\0';
+
+        tv_print(fb, x, y + (row * 16u), line);
+
+        offset += 16;
+        row++;
+    }
+}
+

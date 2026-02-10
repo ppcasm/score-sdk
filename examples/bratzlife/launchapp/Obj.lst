@@ -1,0 +1,21 @@
+/*	Created by S+core IDE	*/
+
+
+INPUT("Debug\bratzlife_startup.o")
+INPUT("Debug\main.o")
+INPUT("Debug\libgloss.o")
+INPUT("Debug\sdcard.o")
+INPUT("Debug\uart.o")
+INPUT("Debug\tv.o")
+INPUT("Debug\ppu.o")
+INPUT("Debug\sys_isr.o")
+INPUT("Debug\sys_irq.o")
+INPUT("Debug\i2c.o")
+INPUT("Debug\discpu_funcs.o")
+INPUT("Debug\change_clk.o")
+
+SECTIONS
+{
+
+}
+
