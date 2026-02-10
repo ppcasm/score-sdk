@@ -117,7 +117,8 @@ Some examples require you to install **Python 3** for post-build tooling.
 
 ---
 
-## Mattel HyperScan(documentation/hyperscan/README.md)
+### Mattel HyperScan
+[View full HyperScan documentation →](documentation/hyperscan/)
 
 ### HyperScan-Specific Features
 
@@ -129,7 +130,8 @@ Some examples require you to install **Python 3** for post-build tooling.
 
 ---
 
-## MGA BratzLife(documentation/bratzlife/README.md)
+### MGA BratzLife
+[View full BratzLife documentation →](documentation/bratzlife/)
 
 ### BratzLife-Specific Features
 
