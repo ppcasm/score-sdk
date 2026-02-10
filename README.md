@@ -66,6 +66,8 @@ existing ones.
 - Custom interrupt handling
 - Basic TV encoder / framebuffer support
 
+---
+
 ### Platform-Specific Support
 
 These live alongside the core SDK and are **opt-in per platform**. Some examples would be things like:
@@ -115,7 +117,7 @@ Some examples require you to install **Python 3** for post-build tooling.
 
 ---
 
-## Mattel HyperScan
+## Mattel HyperScan(documentation/hyperscan/README.md)
 
 ### HyperScan-Specific Features
 
@@ -127,7 +129,7 @@ Some examples require you to install **Python 3** for post-build tooling.
 
 ---
 
-## MGA BratzLife
+## MGA BratzLife(documentation/bratzlife/README.md)
 
 ### BratzLife-Specific Features
 
