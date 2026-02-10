@@ -50,8 +50,8 @@ existing ones.
 
 | Platform | Status | Notes |
 |--------|--------|-------|
-|  **[Mattel HyperScan](documentation/hyperscan/README.md)** | ✅ Supported | CD, UART, USB booting, custom firmware |
-|  **[MGA BratzLife](documentation/hyperscan/README.md)** | ✅ Supported | SD-based loading on unmodified hardware |
+|  **[Mattel HyperScan](documentation/hyperscan/)** | ✅ Supported | CD, UART, USB booting, custom firmware |
+|  **[MGA BratzLife](documentation/hyperscan/)** | ✅ Supported | SD-based loading on unmodified hardware |
 | **Zone3D** | ⏳ Planned | Structure in place, support coming later |
 
 ---
