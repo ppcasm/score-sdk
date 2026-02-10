@@ -127,22 +127,6 @@ Some examples require you to install **Python 3** for post-build tooling.
 
 ---
 
-### Loading Homebrew on HyperScan
-
-#### Loading from CD
-
-Use **Nero Burning ROM** with ISO9660, Mode 1, no Joliet, finalized disc.
-
-#### Loading from UART
-
-Requires soldering TX/RX/GND to labeled board pads.
-
-#### Loading from USB
-
-Requires FAT32 (MBR) USB drive with external power.
-
----
-
 ## MGA BratzLife
 
 ### BratzLife-Specific Features
