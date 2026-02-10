@@ -115,8 +115,6 @@ Some examples require you to install **Python 3** for post-build tooling.
 
 ## Platform-Specific Documentation
 
----
-
 ### Mattel HyperScan
 [View full HyperScan documentation →](documentation/hyperscan/)
 
