@@ -63,7 +63,7 @@ and documented in this SDK:
 
 ## Hardware Summary
 
-- **SoC:** Sunplus SPG29x (S+Core)
+- **SoC:** Sunplus SPG290 (S+Core)
 - **RAM:** 16MB
 - **Storage:** Internal Parallel NOR Flash
 - **Media:** CD-ROM
@@ -170,9 +170,7 @@ LOAD_FILE=<Load_Filename>
 
 Located under:
 
-```
-[HyperScan Example Projects](examples/hyperscan/)
-```
+[HyperScan Example Projects](../../examples/hyperscan/)
 
 Includes rough demos of things like PONG, flash recovery, CFW tools, and even DOOM!
 
