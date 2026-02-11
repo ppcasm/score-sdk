@@ -35,6 +35,7 @@ layout, **you can render the system unbootable**.
 - [Boot Description/System Overview](#boot-description--system-overview))
 - [Memory Layout](#memory-layout)
 - [Loading Homebrew](#loading-homebrew)
+- [Example Projects](#example-projects)
 - [Custom Firmware/Bootloader](#custom-firmware)
 - [System Specific Notes](#system-specific-notes)
 - [Thanks To](#thanks-to)
@@ -165,15 +166,6 @@ LOAD_FILE=<Load_Filename>
 
 ---
 
-## Custom Firmware
-
-Custom firmware adds:
-- UART flash rescue
-- USB booting
-- CFW live testing
-
----
-
 ## Example Projects
 
 Located under:
@@ -183,6 +175,15 @@ examples/hyperscan/
 ```
 
 Includes rough demos of things like PONG, flash recovery, CFW tools, and even DOOM!
+
+---
+
+## Custom Firmware
+
+Custom firmware adds:
+- UART flash rescue
+- USB booting
+- CFW live testing
 
 ---
 
