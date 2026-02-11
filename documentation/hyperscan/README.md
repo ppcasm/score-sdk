@@ -23,7 +23,7 @@ This documentation includes information about:
 If you write incorrect data to flash, or boot code built for the wrong memory
 layout, **you can render the system unbootable**.
 
-Proceed only if you understand the risks.
+**Proceed only if you understand the risks.**
 
 ---
 
@@ -114,17 +114,17 @@ Understanding memory layout is **critical**.
 
 ### CD Based Loading (HYPER.EXE)
 
-This is the original and safest method. See the "CD Development Guide.doc" for instructions on how to burn a "HYPER.EXE" file on to a CD.
+This is the original and safest method. See the "CD Development Guide.doc" for instructions on how to burn a **HYPER.EXE** file on to a CD.
 
-The "HYPER.EXE" file must exist on the root of a CD in order for HyperScan OS to load and execute. Anything that loads after that would need to load from that executable.
+The **HYPER.EXE** file must exist on the root of a CD in order for HyperScan OS to load and execute. Anything that loads after that would need to load from that executable.
 
 ### UART Based Loading & Recovery
 
-This requires internal soldering to the **TX/RX/GND** labeled pads on the PCB. It also requires either a HYPER.EXE based UART loader to be loaded from CD, or the custom firmware/bootloader that allows for recovery (see [FlashRecovery](../../examples/hyperscan/cd/flashrecovery/) repo code for more details). 
+This requires internal soldering to the **TX/RX/GND** labeled pads on the PCB. It also requires either a **HYPER.EXE** based UART loader to be loaded from CD, or the custom firmware/bootloader that allows for recovery (see [FlashRecovery](examples/hyperscan/cd/flashrecovery/) repo code for more details). 
 
-You can find these tools under the project root in [HyperScan](/tools/hyperscan) and [S+Core](/tools/score7)
+You can find some these tools under the project root in [HyperScan](/tools/hyperscan) and [S+Core](/tools/score7)
 
-The custom recovery is installed from CD, and is under the [flashRecovery](../../examples/hyperscan/cd/flashrecovery/) project in the repo.
+The custom recovery is installed from CD, and is under the [FlashRecovery](/hyperscan/cd/flashrecovery/) project in the repo.
 
 Once the custom recovery is installed, if you start the HyperScan with the CD door opened any time afterwards, you'll see all of the LEDs turn on and you can then use the **TX/RX/GND** PCB connections to load a binary to **0xA00001FC** and entry at **0xA0001000**
 
@@ -132,23 +132,23 @@ The idea here is that we treat the start of NOR flash as a "boot block" that nev
 
 You will see the LEDs "spin" to let you know that your recovery app is uploading. When it's done uploading they will turn off as code execution starts at **0xA0001000**
 
-This will also let you temporarily test CFW modifications by simply uploading the entire CFW at recovery time, before making any permanent changes.
+This will also let you temporarily test CFW modifications by simply uploading the entire CFW at recovery time, before making any permanent changes with [FlashCFW](/examples/hyperscan/recovery/flashcfw)
 
 ### USB Based Loading (Custom Firmware)
 
-This requires a FAT32 (MBR) formatted USB with external power. It also requires soldering the UART wires (TX/RX/GND) and installing the custom recovery bootloader and then accompanying custom firmware (see project root [CFWPatcher](/tools/hyperscan/CFWPatcher) for more info)
+This requires a FAT32 (MBR) formatted USB with external power. It also requires soldering the UART wires **TX/RX/GND** labeled internally on the PCB, and installing the custom recovery bootloader and then accompanying custom firmware (see project root [CFWPatcher](/tools/hyperscan/CFWPatcher) for more info)
 
 The reason is because it would be hugely unsafe to flash any custom firmware without a way to recover, and the only way to recover without removing and externally fashing is through the custom UART recovery bootloader. 
 
-The idea here is that you install the custom recovery bootloader found in [FlashRecovery](/examples/hyperscan/cd/flashrecovery) Vwhich then creates a sort of "boot block" that we never touch, so that we ensure that should we need to recover from a bad CFW flash, we can do so by uploading a new CFW flasher.
+The idea here is that you install the custom recovery bootloader found in [FlashRecovery](/examples/hyperscan/cd/flashrecovery) which then creates a sort of "boot block" that we never touch, so that we ensure that should we need to recover from a bad CFW, we can.
 
-It is required that you install the custom recovery bootloader, and from there you can install custom firmware using the CFWPatcher in /tools/hyperscan/CFWPatcher and then flash that CFW binary with the project at [FlashCFW](/examples/hyperscan/recovery/flashcfw)
+It is required that you install the custom UART recovery bootloader, and from there you can install custom firmwares (including the one that supports USB booting) using the [CFWPatcher]/tools/hyperscan/CFWPatcher tool to create the CFW, and then flash that CFW binary with the project at [FlashCFW](/examples/hyperscan/recovery/flashcfw)
 
 If everything goes well then you should be able to add a Y-power cable that will provide exernal power to a USB thumb drive, and then build the project at [USBLoader](/examples/hyperscan/usb/usbloader) and save it on the root of the USB drive as **usbload.bin**
 
-By default it will load usbload.bin to the address that normal HyperScan load to at **0xA00901FC** and entry at **0xA0091000** but it does support **".ini"** files.
+By default it will load **usbload.bin** to the address that normal HyperScan load to at **0xA00901FC** and entry at **0xA0091000** but it does support **".ini"** files.
 
-To use the ".ini" support, place usbload.ini on root of USB, and the configuration options are as listed:
+To use the ".ini" support, place **usbload.ini** on root of USB, and the configuration options are as listed:
 
 LOAD_ADDR=<Load_Address>
 
@@ -169,7 +169,7 @@ LOAD_FILE=<Load_Filename>
 Custom firmware adds:
 - UART flash rescue
 - USB booting
-- Recovery tooling
+- CFW live testing
 
 ---
 
