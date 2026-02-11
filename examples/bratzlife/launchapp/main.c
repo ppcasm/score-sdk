@@ -200,35 +200,104 @@ u8 eeprom_read_byte(u8 *ack, u8 devaddr_w, u8 offset)
     return v;
 }
 
+/*
+ * Write one byte, then "ACK-poll" until the EEPROM accepts SLA+W again.
+ *
+ * Returns 1 on success, 0 if any of the initial phases NACK.
+ *
+ * Notes:
+ *  - devaddr_w should be the write address byte (ex: 0xA0)
+ *  - This matches the decompiled logic: do the 3-byte write, STOP,
+ *    then loop START+SLA+W until ACK is seen.
+ */
+u8 eeprom_write_byte(u8 *ack, u8 devaddr_w, u8 offset, u8 data)
+{
+    u8 ok = 0;
+
+    if (ack) *ack = 0;
+
+    /* START + SLA+W */
+    i2c_start();
+    i2c_write_byte(ack, devaddr_w);
+    if (!ack || *ack == 0) {
+        /* decompiled version didn't always STOP on failure, but we should */
+        i2c_stop();
+        return 0;
+    }
+
+    /* Offset */
+    i2c_write_byte(ack, offset);
+    if (*ack == 0) {
+        i2c_stop();
+        return 0;
+    }
+
+    /* Data */
+    i2c_write_byte(ack, data);
+    if (*ack == 0) {
+        i2c_stop();
+        return 0;
+    }
+
+    /* STOP ends the write cycle start */
+    i2c_stop();
+
+    /* ACK polling: keep trying SLA+W until it ACKs */
+    while (!ok) {
+        i2c_start();
+        i2c_write_byte(ack, devaddr_w);
+        if (ack && *ack) {
+            ok = 1;
+        }
+        i2c_stop();
+    }
+
+    if (ack) *ack = ok;
+    return ok;
+}
+
 int main(){
-	
-	unsigned int i;
-	unsigned char ack;
-	unsigned char value;
+
+    unsigned int i;
+    unsigned char ack;
     unsigned char buf[64];
     char printbuf[512];
-    
-	int nExitCode = 0;
+
+    int nExitCode = 0;
 
     tv_init(RESOLUTION_640_480, COLOR_RGB565, 0xA0400000, 0xA0400000, 0xA0400000);
 
-    tv_print(fb, 28, 2, "MGA BratzLife EEPROM Dumper");
-    
+    tv_print(fb, 24, 2, "MGA BratzLife EEPROM Dumper");
+
+    /* Demo: read first 8 bytes */
     for(i=0;i<8;i++) {
-        buf[i] = eeprom_read_byte(&ack, 0xA0, i);
-    	if (ack) {
-            /* Success: value is valid */
+        buf[i] = eeprom_read_byte(&ack, 0xA0, (u8)i);
+        if (ack) {
             sprintf(printbuf, "OFFSET: %d | HEX: %02x | CHAR: %c", i, buf[i], buf[i]);
-            tv_print(fb, 28, 3+i, printbuf);
+            tv_print(fb, 24, 3+i, printbuf);
         } else {
-            /* Failure: NACK occurred somewhere */
-            //tv_print(fb, 28, 3, "EEPROM Read Failed!");
+            /* NACK occurred somewhere */
+            tv_print(fb, 24, 3+i, "NACK");
         }
     }
-    
-	while(1){
-		
-	}
-		
-	return nExitCode;
+
+    /*
+    // Demo: write a byte then read it back
+    {
+        u8 ok;
+        ok = eeprom_write_byte_poll(&ack, 0xA0, 0x00, 0x41); // write 'A' at offset 0
+        sprintf(printbuf, "WRITE ok=%d ack=%d", ok, ack);
+        tv_print(fb, 28, 12, printbuf);
+
+        value = eeprom_read_byte(&ack, 0xA0, 0x00);
+        sprintf(printbuf, "READBACK: %02x (ack=%d)", value, ack);
+        tv_print(fb, 28, 13, printbuf);
+    }
+    */
+
+    while(1){
+
+    }
+
+    return nExitCode;
 }
