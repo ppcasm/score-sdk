@@ -170,7 +170,7 @@ LOAD_FILE=<Load_Filename>
 
 Located under:
 
-[HyperScan Example Projects](examples/hyperscan/)
+[HyperScan Example Projects](../../examples/hyperscan/)
 
 Includes rough demos of things like PONG, flash recovery, CFW tools, and even DOOM!
 
