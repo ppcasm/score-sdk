@@ -115,7 +115,7 @@ The system includes a hidden SD card loader from the factory. This can be used t
 - GameName - Basically the name of the app loaded by LaunchApp (example: payload)
 - DiscName - Not needed and seems largely unused. My guess is that it's a test with other medium, or something else
 - DiscIdFile - Same info as DiscName.
-- LaunchApp - Full patch name of the S+Core payload you wish you execute (example: dev0:MGA/payload.bin)
+- LaunchApp - Full patch name of the S+Core payload you wish you execute (example: dev0:MGA\payload.bin)
 
 There exists a bug in the loader. It seems that when they developed the loader they had the loader stored right after the interrupt vector table, which effectively ends at address **0xA0000300.** The loader is actually at address **0xA0000310** but the problem is that when the file pointed to by LaunchApp is read from the SD card, the size is obtained, and the space is allocated, and then the copy function at **0xA0000310** is called.
 
