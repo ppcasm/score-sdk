@@ -36,6 +36,7 @@ layout, **you can render the system unbootable**.
 - [Memory Layout](#memory-layout)
 - [Loading Homebrew](#loading-homebrew)
 - [Custom Firmware/Bootloader](#custom-firmware)
+- [System Specific Notes](#system-specific-notes)
 - [Thanks To](#thanks-to)
 - [License](#license)
 
@@ -185,6 +186,11 @@ Includes rough demos of things like PONG, flash recovery, CFW tools, and even DO
 
 ---
 
+## System Specific Notes
+
+N/A
+
+---
 ## License
 
 **Free Software, Hell Yeah!**
