@@ -65,7 +65,7 @@ and documented in this SDK:
 - **RAM:** 16MB
 - **Storage:** Internal Parallel NOR Flash
 - **Media:** CD-ROM
-- **I/O:** USB (host/device), UART (internal), SD Card (internal), controllers (I2C), LEDs, RFID
+- **I/O:** USB (host/device), UART (internal), SD Card (internal), Controllers (i2c), LEDs, RFID
 - **Audio/Video:** Analog TV output via internal TV encoder
 
 ---
