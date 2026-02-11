@@ -60,7 +60,7 @@ You should then be greeted with a screen that lets you test SD card, controllers
 
 ## Boot Description / System Overview
 
-The **MGA BratzLife** game is configured to start booting from a 32MB NAND flash mapped to address **0x9F000000**. At that point after initalizations are complete, the code app then copies a bit out of flash into SDRAM at address **0xA0700000** and this then starts a NAND loader that loads the real game. 
+The **MGA BratzLife** game is configured to start booting from a 32MB NAND flash mapped to address **0x9F000000** with entry at **0x9F001000.** At that point after initalizations are complete, the code app then copies a bit out of flash into SDRAM at address **0xA0700000** and this then starts a NAND loader that loads the real game. 
 
 At some point the code checks if an SD card is inserted, and if it is it will do some more checks and attempt to load assets from the SD card under certain conditions.
 
