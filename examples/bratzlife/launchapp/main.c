@@ -1,6 +1,6 @@
 /*
 
-This is part of the Mattel HyperScan SDK by ppcasm (ppcasm@gmail.com)
+This is part of the MGA BratzLife examples from the Sunplus S+Core SDK by ppcasm (ppcasm@gmail.com)
 
 */
 
