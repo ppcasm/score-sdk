@@ -171,10 +171,12 @@ LOAD_FILE=<Load_Filename>
 Located under:
 
 ```
-examples/hyperscan/
+[HyperScan Example Projects](examples/hyperscan/)
 ```
 
 Includes rough demos of things like PONG, flash recovery, CFW tools, and even DOOM!
+
+The layout might seem confusing at first, but the examples on HyperScan are categorized by the medium on which they're intended to run. For example "all" means the compiled examples should run from CD, USB, etc. The examples under "cd" should only be ran from CD. Apps ran from under "recovery" should be ran from the optional custom recovery bootloader if you have it installed, and of course the ones under "usb" should be loaded from USB. DOOM is an example of this because the example version uses the USB to store the game and assets (though this might change in the future).
 
 ---
 
