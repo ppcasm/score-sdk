@@ -80,9 +80,9 @@ You should then be greeted with a screen that lets you test USB host/device mode
 
 ## Boot Description / System Overview
 
-The **Mattel HyperScan** is configured to start booting from a 1MB parallel NOR flash mapped to address 0x9F000000. At that point after initalizations are complete, the main "HyperScan OS" is copied out of NOR flash, and into SDRAM starting at address 0xA00001FC (interrupt vector) and has its entry at 0xA0001000 (OS entry)
+The **Mattel HyperScan** is configured to start booting from a 1MB parallel NOR flash mapped to address **0x9F000000**. At that point after initalizations are complete, the main "HyperScan OS" is copied out of NOR flash, and into SDRAM starting at address **0xA00001FC** (interrupt vector) and has its entry at **0xA0001000** (OS entry)
 
-When the HyperScan OS is loaded it will then subsequently load a "HYPER.EXE" from the root of an inserted CD. This application will load to 0xA00901FC (non-main interrupt vector, largely unused) and application entry will then happen at 0xA0091000 (APP entry)
+When the HyperScan OS is loaded it will then subsequently load a **HYPER.EXE** file from the root of an inserted CD. This application will load to **0xA00901FC** (non-main interrupt vector, largely unused) and application entry will then happen at **0xA0091000** (APP entry)
 
 The HyperScan OS provides callbacks that provide much of the functions that the HyperScan is capable of doing (RFID, CD, etc) and the SDK does utilize most of these capabilities through callback macros in order to facilitate development how it was decidedly meant to be used on the system.
 
