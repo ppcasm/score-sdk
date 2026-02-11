@@ -38,7 +38,6 @@ layout, **you can render the system unbootable**.
 - [Example Projects](#example-projects)
 - [Custom Firmware/Bootloader](#custom-firmware)
 - [System Specific Notes](#system-specific-notes)
-- [Thanks To](#thanks-to)
 - [License](#license)
 
 ---
