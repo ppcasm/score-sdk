@@ -63,7 +63,7 @@ and documented in this SDK:
 
 ## Hardware Summary
 
-- **SoC:** Sunplus SPG29x (S+Core)
+- **SoC:** Sunplus SPG290 (S+Core)
 - **RAM:** 16MB
 - **Storage:** Internal Parallel NOR Flash
 - **Media:** CD-ROM
