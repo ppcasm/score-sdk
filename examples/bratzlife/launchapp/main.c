@@ -259,8 +259,9 @@ u8 eeprom_write_byte(u8 *ack, u8 devaddr_w, u8 offset, u8 data)
 int main(){
 
     unsigned int i;
-    unsigned char ack;
-    unsigned char buf[64];
+    u8 ack;
+    u8 value;
+    u8 buf[64];
     char printbuf[512];
 
     int nExitCode = 0;
@@ -269,32 +270,32 @@ int main(){
 
     tv_print(fb, 24, 2, "MGA BratzLife EEPROM Dumper");
 
-    /* Demo: read first 8 bytes */
-    for(i=0;i<8;i++) {
+    // Demo: read first 16 bytes
+    for(i=0;i<16;i++) {
         buf[i] = eeprom_read_byte(&ack, 0xA0, (u8)i);
         if (ack) {
             sprintf(printbuf, "OFFSET: %d | HEX: %02x | CHAR: %c", i, buf[i], buf[i]);
             tv_print(fb, 24, 3+i, printbuf);
         } else {
-            /* NACK occurred somewhere */
+            // NACK occurred somewhere
             tv_print(fb, 24, 3+i, "NACK");
         }
     }
 
     /*
     // Demo: write a byte then read it back
-    {
-        u8 ok;
-        ok = eeprom_write_byte_poll(&ack, 0xA0, 0x00, 0x41); // write 'A' at offset 0
-        sprintf(printbuf, "WRITE ok=%d ack=%d", ok, ack);
-        tv_print(fb, 28, 12, printbuf);
 
-        value = eeprom_read_byte(&ack, 0xA0, 0x00);
-        sprintf(printbuf, "READBACK: %02x (ack=%d)", value, ack);
-        tv_print(fb, 28, 13, printbuf);
-    }
+    u8 ok;
+    ok = eeprom_write_byte(&ack, 0xA0, 0x00, 0x41); // write 'A' at offset 0
+    sprintf(printbuf, "WRITE ok=%d ack=%d", ok, ack);
+    tv_print(fb, 28, 3, printbuf);
+
+    value = eeprom_read_byte(&ack, 0xA0, (u8)0x00);
+    sprintf(printbuf, "READBACK: %02x (ack=%d)", value, ack);
+    tv_print(fb, 28, 4, printbuf);
+
     */
-
+    
     while(1){
 
     }
