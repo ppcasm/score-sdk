@@ -72,7 +72,7 @@ and documented in this SDK:
 
 ## Entering Test Menu
 
-While on the main HyperScan screen, where it says **"Insert Disc"** you start by holding the **LEFT** shoulder button, **START** button, and the **GREEN** button. Then you should see a message that says "Please Wait", and then you press **RED, RED, GREEN, GREEN, YELLOW, BLUE** in that order.
+While on the main HyperScan screen, where it says **"Insert Disc"** you start by holding the **LEFT** shoulder button, **START** button, and the **GREEN** button. Then you should see a message that says **"Please Wait"**, and then you press **RED, RED, GREEN, GREEN, YELLOW, BLUE** in that order.
 
 You should then be greeted with a screen that lets you test USB host/device mode, Controllers, etc.
 
