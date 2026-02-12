@@ -6,11 +6,13 @@ This is part of the MGA BratzLife examples from the Sunplus S+Core SDK by ppcasm
 
 #include "tv/tv.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "sdcard/sdcard.h"
 #include "score7_registers.h"
 #include "score7_constants.h"
 
-unsigned short *fb = (unsigned short *) 0xA0400000;
+//unsigned short *fb = (unsigned short *) 0xA0500000;
 
 typedef unsigned char  u8;
 typedef unsigned long  u32;
@@ -212,93 +214,77 @@ u8 eeprom_read_byte(u8 *ack, u8 devaddr_w, u8 offset)
  */
 u8 eeprom_write_byte(u8 *ack, u8 devaddr_w, u8 offset, u8 data)
 {
-    u8 ok = 0;
+	unsigned char status = 0;
+    //u8 ok = 0;
 
     if (ack) *ack = 0;
 
-    /* START + SLA+W */
     i2c_start();
     i2c_write_byte(ack, devaddr_w);
-    if (!ack || *ack == 0) {
-        /* decompiled version didn't always STOP on failure, but we should */
-        i2c_stop();
-        return 0;
-    }
+    if (!ack || *ack == 0) status = 0;
 
-    /* Offset */
     i2c_write_byte(ack, offset);
-    if (*ack == 0) {
-        i2c_stop();
-        return 0;
-    }
+    if (!ack || *ack == 0) status = 0;
 
-    /* Data */
     i2c_write_byte(ack, data);
-    if (*ack == 0) {
-        i2c_stop();
-        return 0;
-    }
+    if (!ack || *ack == 0) status = 0;
 
-    /* STOP ends the write cycle start */
     i2c_stop();
 
-    /* ACK polling: keep trying SLA+W until it ACKs */
-    while (!ok) {
-        i2c_start();
-        i2c_write_byte(ack, devaddr_w);
-        if (ack && *ack) {
-            ok = 1;
-        }
-        i2c_stop();
-    }
+    return status;
+}
 
-    if (ack) *ack = ok;
-    return ok;
+void tv_print_center(unsigned short *fb, int y, const char *text)
+{
+    int screen_cols = 80;  // 640/8
+    int x = (screen_cols - strlen(text)) / 2;
+    tv_print(fb, x, y, text);
 }
 
 int main(){
 
     unsigned int i;
     u8 ack;
-    u8 value;
+    //u8 value;
     u8 buf[64];
-    char printbuf[512];
+    char printbuf[1024];
 
     int nExitCode = 0;
 
-    tv_init(RESOLUTION_640_480, COLOR_RGB565, 0xA0400000, 0xA0400000, 0xA0400000);
+    unsigned int *fb = malloc(640 * 480 * 2);
+    
+    tv_init(RESOLUTION_640_480, COLOR_RGB565, (unsigned int )fb, (unsigned int)fb, (unsigned int)fb);
 
-    tv_print(fb, 24, 2, "MGA BratzLife EEPROM Dumper");
+    tv_print_center((unsigned short *)fb, 2, "MGA BratzLife EEPROM Dumper - ppcasm (ppcasm@gmail.com)");
 
     // Demo: read first 16 bytes
     for(i=0;i<16;i++) {
         buf[i] = eeprom_read_byte(&ack, 0xA0, (u8)i);
         if (ack) {
             sprintf(printbuf, "OFFSET: %d | HEX: %02x | CHAR: %c", i, buf[i], buf[i]);
-            tv_print(fb, 24, 3+i, printbuf);
+            tv_print_center((unsigned short *)fb, 4+i, printbuf);
         } else {
             // NACK occurred somewhere
-            tv_print(fb, 24, 3+i, "NACK");
+            tv_print((unsigned short *)fb, 24, 4+i, "NACK");
         }
     }
+ 
 
-    /*
     // Demo: write a byte then read it back
-
-    u8 ok;
-    ok = eeprom_write_byte(&ack, 0xA0, 0x00, 0x41); // write 'A' at offset 0
-    sprintf(printbuf, "WRITE ok=%d ack=%d", ok, ack);
-    tv_print(fb, 28, 3, printbuf);
+    /*
+    unsigned char ack;
+    unsigned char value;
+    unsigned char printbuf[1024];
+    //ok = eeprom_write_byte(&ack, 0xA0, 0x00, 0x41); // write 'A' at offset 0
+    //sprintf(printbuf, "WRITE ok=%d ack=%d", ok, ack);
+    //tv_print(fb, 28, 3, printbuf);
+    //tv_print_center((unsigned short *)fb, 3, "Happy Valentines day to the baby Haley! >_>");
 
     value = eeprom_read_byte(&ack, 0xA0, (u8)0x00);
     sprintf(printbuf, "READBACK: %02x (ack=%d)", value, ack);
-    tv_print(fb, 28, 4, printbuf);
-
+    tv_print_center((unsigned short *)fb, 3, printbuf);
     */
-    
-    while(1){
-
-    }
+    while(1);
 
     return nExitCode;
 }
