@@ -9,7 +9,7 @@ homebrew, recovery, and custom firmware on the Mattel HyperScan.
 
 ---
 
-## ⚠️ HyperScan-Specific Warning
+## ⚠️ HyperScan Specific Warning
 
 It is possible under certain circumstances **to permanently brick** the HyperScan if used incorrectly, please **READ** documentation carefully.
 

@@ -110,11 +110,6 @@ under_wt:							//	Processor is under write-through mode
 biu_wben:
 		cache 0x1b, [r4, 0]
 		
-		// Setup SDRAM
-		//la	r9, 0x88070060
-		//la r10, 0x95404b04
-		//sw r10, [r9, 0]
-		
 		// Setup stack pointer
 		la r0,_stack
 		

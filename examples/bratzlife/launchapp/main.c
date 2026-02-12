@@ -14,6 +14,23 @@ This is part of the MGA BratzLife examples from the Sunplus S+Core SDK by ppcasm
 
 //unsigned short *fb = (unsigned short *) 0xA0500000;
 
+#define REG32(addr) (*(volatile unsigned int *)(addr))
+
+#define P_IRQ_CONTROL  REG32(0x88010080)
+#define P_IRQ_STATUS   REG32(0x88010084)
+
+#define BLK_ST_EN      (1u << 1)   // VBlank start IRQ enable
+#define BLK_END_EN     (1u << 2)   // VBlank end IRQ enable
+
+static inline void tve_enable_vblank_irq(void) {
+    // Clear any stale flags first
+    // If block is "write-1-to-clear", do:
+    // P_IRQ_STATUS = (1u << 1) | (1u << 2);
+
+    P_IRQ_CONTROL |= BLK_ST_EN;          // VBlank start
+    // P_IRQ_CONTROL |= BLK_END_EN;       // Optional: VBlank end
+}
+
 typedef unsigned char  u8;
 typedef unsigned long  u32;
 
