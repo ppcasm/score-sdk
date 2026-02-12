@@ -19,6 +19,7 @@ support for additional SPG29x consoles (e.g. Zone3D).
 - [Overview](#overview)
 - [Supported Platforms](#supported-platforms)
 - [SDK Features](#sdk-features)
+- [S+Core Documentation](#score-soc-documentation)
 - [SDK Installation](#sdk-installation)
 - [Building & Running Examples](#building--running-examples)
 - [Platform-Specific Documentation](#platform-specific-documentation)
@@ -65,6 +66,12 @@ existing ones.
 - NOR flash interface
 - Custom interrupt handling
 - Basic TV encoder / framebuffer support
+
+---
+
+### S+Core SoC Documentation
+
+All documentation for Sunplus S+Core based SoC can be found in this repo at [S+Core Documentation](documentation/score7/)
 
 ---
 
