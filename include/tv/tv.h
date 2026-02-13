@@ -31,6 +31,7 @@ void tv_fadein(void);
 void tv_fadeout(void);
 void tv_print(unsigned short *fb, unsigned int x, unsigned int y, const char *text);
 void tv_printcolor(unsigned short *fb, unsigned int x, unsigned int y, const char *text, unsigned short color);
+void tv_printcolorex(unsigned short *fb, unsigned int x, unsigned int y, const char *text, unsigned short fgcolor, unsigned short bgcolor);
 void tv_printhex(unsigned short *fb, unsigned intx,  unsigned int y, unsigned long value);
 
 #ifdef __cplusplus
