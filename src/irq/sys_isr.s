@@ -297,6 +297,7 @@ bratzlife_fix:
 .byte 0x00, 0x80, 0x00, 0x80, 0x00, 0xc0, 0x1a, 0x95, 0xf8, 0x83, 0x14, 0x85, 0x10, 0x94, 0x28, 0x81
 .byte 0x0b, 0x80, 0x44, 0x9d, 0x0f, 0x80, 0x48, 0x9d, 0x93, 0x28, 0xfb, 0x47, 0x00, 0x00, 0x00, 0x00
 .byte 0x00, 0x80, 0x00, 0x80, 0x00, 0xc0, 0x5a, 0x95, 0x00, 0xa0, 0x54, 0x85, 0x08, 0xbc, 0x0a, 0x80
+.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 
 .extern intmsg          // intmsg from sys_irq.c
 //=========================================================
@@ -333,132 +334,113 @@ intmsg:
 //=========================================================
 save_reg:
 	// Save registers
-    subi SP, 0x98
-    sw r1,  [SP, 0x4]
-    sw r2,  [SP, 0x8]
-    sw r3,  [SP, 0xC]
-    sw r4,  [SP, 0x10]
-    sw r5,  [SP, 0x14]
-    sw r6,  [SP, 0x18]
-    sw r7,  [SP, 0x1C]
-    sw r8,  [SP, 0x20]
-    sw r9,  [SP, 0x24]
-    sw r10, [SP, 0x28]
-    sw r11, [SP, 0x2C]
-    sw r12, [SP, 0x30]
-    sw r13, [SP, 0x34]
-    sw r14, [SP, 0x38]
-    sw r15, [SP, 0x3C]
-    sw r16, [SP, 0x40]
-    sw r17, [SP, 0x44]
-    sw r18, [SP, 0x48]
-    sw r19, [SP, 0x4C]
-    sw r20, [SP, 0x50]
-    sw r21, [SP, 0x54]
-    sw r22, [SP, 0x58]
-    sw r23, [SP, 0x5C]
-    sw r24, [SP, 0x60]
-    sw r25, [SP, 0x64]
-    sw r26, [SP, 0x68]
-    sw r27, [SP, 0x6C]
-    sw r28, [SP, 0x70]
-    sw r29, [SP, 0x74]
-    sw r30, [SP, 0x78]
-    sw r31, [SP, 0x7C]
-    mfcr    r13, cr1
+    addi       r0,-0xa4
+    sw         r1,[r0,0x4]
+    sw         r2,[r0,0x8]
+    sw         r3,[r0,0xc]
+    sw         r4,[r0,0x10]
+    sw         r5,[r0,0x14]
+    sw         r6,[r0,0x18]
+    sw         r7,[r0,0x1c]
+    sw         r8,[r0,0x20]
+    sw         r9,[r0,0x24]
+    sw         r10,[r0,0x28]
+    sw         r11,[r0,0x2c]
+    sw         r12,[r0,0x30]
+    sw         r13,[r0,0x34]
+    sw         r14,[r0,0x38]
+    sw         r15,[r0,0x3c]
+    sw         r16,[r0,0x40]
+    sw         r17,[r0,0x44]
+    sw         r18,[r0,0x48]
+    sw         r19,[r0,0x4c]
+    sw         r20,[r0,0x50]
+    sw         r21,[r0,0x54]
+    sw         r22,[r0,0x58]
+    sw         r23,[r0,0x5c]
+    sw         r24,[r0,0x60]
+    sw         r25,[r0,0x64]
+    sw         r26,[r0,0x68]
+    sw         r27,[r0,0x6c]
+    sw         r28,[r0,0x70]
+    sw         r29,[r0,0x74]
+    sw         r30,[r0,0x78]
+    sw         r31,[r0,0x7c]
+    mfcr       r13,cr1
+    sw         r13,[r0,0x84]
+    mfcr       r15,cr5
+    sw         r15,[r0,0x8c]
+    mfcr       r16,cr0
+    sw         r16,[r0,0x80]
+    mfceh      r13
+    sw         r13,[r0,0x90]
+    mfcel      r13
+    sw         r13,[r0,0x94]
+    mfsr       r13,sr0
+    sw         r13,[r0,0x98]
+    mfsr       r13,sr1
+    sw         r13,[r0,0x9c]
+    mfsr       r13,sr2
+    sw         r13,[r0,0xa0]
+    mfcr       r4,cr2
+    jl         irq_dispatch
+    lw         r8,[r0,0x90]
+    mtceh      r8
+    lw         r8,[r0,0x94]
+    mtcel      r8
+    lw         r8,[r0,0x98]
+    mtsr       r8,sr0
+    lw         r8,[r0,0x9c]
+    mtsr       r8,sr1
+    lw         r8,[r0,0xa0]
+    mtsr       r8,sr2
+    lw         r1,[r0,0x4]
+    lw         r2,[r0,0x8]
+    lw         r3,[r0,0xc]
+    lw         r4,[r0,0x10]
+    lw         r5,[r0,0x14]
+    lw         r6,[r0,0x18]
+    lw         r7,[r0,0x1c]
+    lw         r10,[r0,0x28]
+    lw         r11,[r0,0x2c]
+    lw         r12,[r0,0x30]
+    lw         r13,[r0,0x34]
+    lw         r14,[r0,0x38]
+    lw         r15,[r0,0x3c]
+    lw         r16,[r0,0x40]
+    lw         r17,[r0,0x44]
+    lw         r18,[r0,0x48]
+    lw         r19,[r0,0x4c]
+    lw         r20,[r0,0x50]
+    lw         r21,[r0,0x54]
+    lw         r22,[r0,0x58]
+    lw         r23,[r0,0x5c]
+    lw         r24,[r0,0x60]
+    lw         r25,[r0,0x64]
+    lw         r26,[r0,0x68]
+    lw         r27,[r0,0x6c]
+    lw         r28,[r0,0x70]
+    lw         r29,[r0,0x74]
+    lw         r30,[r0,0x78]
+    lw         r31,[r0,0x7c]
+    lw         r8,[r0,0x84]
+    mtcr       r8,cr1
+    lw         r8,[r0,0x8c]
+    mtcr       r8,cr5
+    lw         r8,[r0,0x80]
+    mtcr       r8,cr0
+    nop!
+    nop!
+    nop!
+    nop!
     nop
-    nop
-    nop
-    nop
-    nop
-    mfcr    r15, cr5
-    nop
-    nop
-    nop
-    nop
-    nop
-    sw r13, [SP, 0x84]
-    sw r15, [SP, 0x8C]
-	mfcehl r13, r14
-	nop
-	nop
-	nop
-	nop
-	nop
-	sw r13, [SP, 0x90]
-	sw r14, [SP, 0x94]
-    mfcr    r4, cr2
-    nop
-    nop
-    nop
-    nop
-    nop
-    jl	irq_dispatch
-    nop
-    
-    // Restore registers
-    lw r13, [SP, 0x90]
-    lw r14, [SP, 0x94]
-    mtcehl r13, r14
-    nop
-    nop
-    nop
-    nop
-    nop
-    lw r30, [SP, 0x84]
-    lw r31, [SP, 0x8C]
-    mtcr r30, cr1
-    nop
-    nop
-    nop
-    nop
-    nop
-    mtcr r31, cr5
-    nop
-    nop
-    nop
-    nop
-    nop
-    lw r1,  [SP, 0x04]
-    lw r2,  [SP, 0x08]
-    lw r3,  [SP, 0x0C]
-    lw r4,  [SP, 0x10]
-    lw r5,  [SP, 0x14]
-    lw r6,  [SP, 0x18]
-    lw r7,  [SP, 0x1C]
-    lw r8,  [SP, 0x20]
-    lw r9,  [SP, 0x24]
-    lw r10, [SP, 0x28]
-    lw r11, [SP, 0x2C]
-    lw r12, [SP, 0x30]
-    lw r13, [SP, 0x34]
-    lw r14, [SP, 0x38]
-    lw r15, [SP, 0x3C]
-    lw r16, [SP, 0x40]
-    lw r17, [SP, 0x44]
-    lw r18, [SP, 0x48]
-    lw r19, [SP, 0x4C]
-    lw r20, [SP, 0x50]
-    lw r21, [SP, 0x54]
-    lw r22, [SP, 0x58]
-    lw r23, [SP, 0x5C]
-    lw r24, [SP, 0x60]
-    lw r25, [SP, 0x64]
-    lw r26, [SP, 0x68]
-    lw r27, [SP, 0x6C]
-    lw r28, [SP, 0x70]
-    lw r29, [SP, 0x74]
-    lw r30, [SP, 0x78]
-    lw r31, [SP, 0x7C]
-    addi	SP, 0x98
+    lw         r8,[r0,0x20]
+    lw         r9,[r0,0x24]
+    addi       r0,0xa4
     rte
-	nop
-	nop
+    nop
+    nop
+    nop
+    nop
 
-.text
-.global invalid_cache
-invalid_cache:
-	cache 0x18, [r4,0]
-	br r3	
-	
 

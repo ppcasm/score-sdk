@@ -12,7 +12,7 @@ OutPut Dir = Debug
 Inc Path = ..\..\..\include
 Lib Path = 
 Compiler = ..\S_CORE~1.1\GNU\bin\gcc
-Compiler DefFlag = -mscore7 -mel -g -Wall -nostartfiles
+Compiler DefFlag = -mscore7 -mel -g -Wall -Os -nostartfiles
 Compiler AddFlag = 
 Assembler = ..\S_CORE~1.1\GNU\bin\as
 Assembler DefFlag = -Wa,-gdwarf-2  -x assembler-with-cpp
@@ -35,7 +35,7 @@ Stack base address = a07ffffc
 Pre-Link Description = 
 Pre-Link Command = 
 Post-Build Description = bratzlife
-Post-Build Command = 	copy .\Debug\bratzlife.elf.bin d:\MGA\payload.bin
+Post-Build Command = 	copy .\Debug\bratzlife.elf.bin E:\MGA\payload.bin
 Custom Build Enable = 0
 WorkDir = 
 Custom Build = 
@@ -168,6 +168,12 @@ Address Check = 0
 #PROP Default_Filter = 
 
 # Begin Source File
+SOURCE=..\..\..\src\cpu\cache.c
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# Begin Source File
 SOURCE=..\..\..\src\cpu\change_clk.c
 USEPARAM=FALSE
 PARAM=
@@ -264,6 +270,12 @@ PARAM=
 
 # Begin Group "cpuH"
 #PROP Default_Filter = 
+
+# Begin Source File
+SOURCE=..\..\..\include\cpu\cache.h
+USEPARAM=FALSE
+PARAM=
+# End Source File
 
 # Begin Source File
 SOURCE=..\..\..\include\cpu\discpu_func.h

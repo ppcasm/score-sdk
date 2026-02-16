@@ -5,6 +5,14 @@
 #include "score7_constants.h"
 
 //===================================================
+// Prototypes
+//===================================================
+
+extern void attach_isr(unsigned int irq, void (*handler)(void));
+void disable_isr(unsigned int vector);
+void enable_isr(unsigned int vector);
+
+//===================================================
 // S+Core Interrupt Sources
 //===================================================
 #define INT_SPU_FIQ           63      // VecSrc = 0
@@ -47,12 +55,6 @@
 #define INT_RESERVED1         26      // VecSrc = 37
 #define INT_RESERVED2         25      // VecSrc = 38
 #define INT_RESERVED3         24      // VecSrc = 39
-
-//===================================================
-// Prototypes
-//===================================================
-
-extern void attach_isr(unsigned int irq, void (*handler)(void));
 
 //===================================================
 // Unmask Ints

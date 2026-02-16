@@ -1,6 +1,39 @@
 #ifndef _SCORE7_CONSTANTS_H
 #define _SCORE7_CONSTANTS_H
 
+#define COMPILER_BARRIER() __asm__ volatile("" ::: "memory")
+
+//******************************************************************//
+//                            STDINT                                //
+//******************************************************************//
+typedef signed char         int8_t;
+typedef unsigned char       uint8_t;
+
+typedef signed short        int16_t;
+typedef unsigned short      uint16_t;
+
+typedef signed int          int32_t;
+typedef unsigned int        uint32_t;
+
+typedef signed long long    int64_t;
+typedef unsigned long long  uint64_t;
+
+/* Pointer-sized types (32-bit CPU) */
+typedef unsigned int        uintptr_t;
+typedef signed int          intptr_t;
+
+/* size_t */
+#ifndef _SIZE_T_DEFINED
+typedef unsigned int        size_t;
+#define _SIZE_T_DEFINED
+#endif
+
+/* Boolean */
+#ifndef __bool_true_false_are_defined
+typedef enum { false = 0, true = 1 } bool;
+#define __bool_true_false_are_defined 1
+#endif
+
 //******************************************************************//
 //                            CLK-PLL                               //
 //******************************************************************//

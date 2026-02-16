@@ -71,6 +71,18 @@
 .ent _hardware_init
 _hardware_init:
 		
+		// Mask all interrupts
+		// On MGA BratzLife interrupts are disabled when calling the loader, so now is a good time
+		// to mask them
+		ldis r18, 0xFFFF
+		ori r18, 0xFFFF
+		ldis r19, 0x880A
+		ori r19, 0x0020
+		sw r18, [r19, 0]
+		ldis r19, 0x880A
+		ori r19, 0x0024
+		sw r18, [r19, 0]
+
 		// Set up gp
 		la      r28, _gp
 		
@@ -113,7 +125,15 @@ biu_wben:
 		// Setup stack pointer
 		la r0,_stack
 		
-		// void main();
+		// Enable interrupts
+		ldi r4, 0x1
+		mtcr r4, cr0
+		nop!
+		nop!
+		nop!
+		nop!
+		nop
+		
 		jl main
 		nop
 		

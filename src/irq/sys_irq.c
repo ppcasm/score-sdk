@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include "cpu/cache.h"
 #include "score7_registers.h"
+#include "score7_constants.h"
 
 /************************************************************************************
 * S+Core uses vectored interrupts, and here's how that works                        *
@@ -46,22 +48,24 @@ typedef void (*isr_handler)(void);
 static isr_handler isr_table[MAX_IRQ] = { 0 };
 
 // Fallback when no handler is attached
-static void handler_placeholder(void) { }
+static void handler_placeholder(void) { return; }
 
 // Hook IRQ ISR
 void attach_isr(unsigned int irq, isr_handler handler) {
 
+    volatile unsigned int flush_wait = 0;
+    
 	// Only attach handler if our irq is within the appropriate IRQ firing range
     if (irq >= MIN_IRQ && irq <= MAX_IRQ) {
     	
     	// Disable interrupts
-		//asm("li r4, 0x0");
-		//asm("mtcr r4, cr0");
-		//asm("nop");
-		//asm("nop");
-		//asm("nop");
-		//asm("nop");
-		//asm("nop");
+		asm("li r4, 0x0");
+		asm("mtcr r4, cr0");
+		asm("nop");
+		asm("nop");
+		asm("nop");
+		asm("nop");
+		asm("nop");
 		
 		// Install handler to isr_table
     	isr_table[irq] = handler;
@@ -86,52 +90,38 @@ void attach_isr(unsigned int irq, isr_handler handler) {
 		
 		// Swap handler at fixed vector with the one from our (unused) current vector
 		fixed_irq_dispatch[irq_offset] = current_irq_dispatch[irq_offset];
-
-		printf("Installing handler for IRQ%d @ 0x%08x\n", irq, (unsigned int)&fixed_irq_dispatch[irq_offset]);
-		/*
-		// invalidate D-Cache
-		asm("cache 0x18, [r15, 0]");
-		asm("nop");
-		asm("nop!");
-		asm("nop!");
-		asm("nop!");
-		asm("nop!");
-		asm("nop");
 		
-		//	invalidate I-Cache
-		asm("cache 0x10, [r15, 0]");
-		asm("nop");
-		asm("nop!");
-		asm("nop!");
-		asm("nop!");
-		asm("nop!");
-		asm("nop");
-
-		// Drain write buffer
-		asm("cache 0x1A, [r15, 0]");
-		asm("nop");
-		asm("nop!");
-		asm("nop!");
-		asm("nop!");
-		asm("nop!");
-		asm("nop");
-		*/
+		COMPILER_BARRIER();
+		cache_sync(&fixed_irq_dispatch[irq], 4);
+		cache_flush_all();
+		COMPILER_BARRIER();
+		
+		for (flush_wait = 0; flush_wait < 5000; flush_wait++) {
+			__asm__ volatile("nop" ::: "memory");
+		}
+		
+		COMPILER_BARRIER();
+		
+		//printf("Installing handler for IRQ%d @ 0x%08x\n", irq, (unsigned int)&fixed_irq_dispatch[irq_offset]);
+		
 		// Enable interrupts
-		//asm("li r4, 0x1");
-		//asm("mtcr r4, cr0");
-		//asm("nop");
-		//asm("nop");
-		//asm("nop");
-		//asm("nop");
-		//asm("nop");
+		asm("li r4, 0x1");
+		asm("mtcr r4, cr0");
+		asm("nop");
+		asm("nop");
+		asm("nop");
+		asm("nop");
+		asm("nop");
     }
 }
 
 // Get cause and handle IRQ
 void irq_dispatch(unsigned int cp0_cause) {
-    // bits [23:18] of cause register gives the IRQ number
+    // Bits [23:18] of cause register gives the IRQ number
     unsigned int intvec = (cp0_cause & 0x00FC0000u) >> 18;
-    printf("CAUSE: %x\n", intvec);
+
+    //printf("CAUSE: %x\n", intvec);
+ 
 	// Only hook between MIN_IRQ and MAX_IRQ (24~63) for now, until we add custom CPU exception handling
 	if (intvec >= MIN_IRQ && intvec <= MAX_IRQ) {
     	// Look it up in the table
@@ -139,6 +129,99 @@ void irq_dispatch(unsigned int cp0_cause) {
     	if (h) h(); else handler_placeholder();
 	}
 }
+
+/********************************************************************
+* Enable/Disable IRQ ISR                                                    *
+*                                                                   *
+* The module interrupts are enabled from a bit masking via their    *
+* interrupt source number. Because the vector address ends at 63    *
+* it can be reasoned that we could just subtract 63 from the vector *
+* address to base the source number to 0 so that we can just pass   *
+* this function the appropriate "vector address" through the        *
+* interrupt defines in interrupts.h                                 *
+*                                                                   *
+* This means that we could do like this:                            *
+*                                                                   *
+* attach_isr(INT_PPU_VBLANK_START, handler);                        *
+*                                                                   *
+* and then:                                                         *
+* enable_isr(INT_PPU_VBLANK_START);                                 *
+*                                                                   *
+* or:                                                               *
+* disable_isr(INT_PPU_VBLANK_START);                                *
+*                                                                   *
+* Because the masking spans across more than 32 bits, there are 2   *
+* actual interrupt masking registers (CTRL1/CTRL2) and so we need   *
+* to just automatically account for this in the enable/disable ISR  *
+* functions so that it's seamless.                                  *
+*********************************************************************/
+
+static inline unsigned int vector_to_source(unsigned int vector)
+{
+    return 63u - vector;
+}
+
+void enable_isr(unsigned int vector)
+{
+	// Disable interrupts
+	asm("li r4, 0x0");
+	asm("mtcr r4, cr0");
+	asm("nop");
+	asm("nop");
+	asm("nop");
+	asm("nop");
+    asm("nop");
+		    
+    unsigned int intr_src = vector_to_source(vector);
+
+    // Unmask/Enable
+    if (intr_src < 32) {
+        *P_INT_MASK_CTRL1 &= ~(1u << intr_src);
+    } else {
+        *P_INT_MASK_CTRL2 &= ~(1u << (intr_src - 32u));
+    }
+    
+    // Enable interrupts
+	asm("li r4, 0x1");
+	asm("mtcr r4, cr0");
+	asm("nop");
+	asm("nop");
+	asm("nop");
+	asm("nop");
+	asm("nop");
+}
+
+void disable_isr(unsigned int vector)
+{
+	// Disable interrupts
+	asm("li r4, 0x0");
+	asm("mtcr r4, cr0");
+	asm("nop");
+	asm("nop");
+	asm("nop");
+	asm("nop");
+    asm("nop");
+		    
+    unsigned int intr_src = vector_to_source(vector);
+
+    // Mask/Disable
+    if (intr_src < 32) {
+        *P_INT_MASK_CTRL1 |= (1u << intr_src);
+    } else {
+        *P_INT_MASK_CTRL2 |= (1u << (intr_src - 32u));
+    }
+    
+    // Enable interrupts
+	asm("li r4, 0x1");
+	asm("mtcr r4, cr0");
+	asm("nop");
+	asm("nop");
+	asm("nop");
+	asm("nop");
+	asm("nop");
+}
+
+
 
 
 

@@ -1,9 +1,7 @@
+#include "cpu/cache.h"
+#include "sdcard/sdcard.h"
 #include "score7_registers.h"
 #include "score7_constants.h"
-#include "sdcard/sdcard.h"
-#include "tv/tv.h"
-
-unsigned short *fba = (unsigned short *) 0xa0400000;
 
 // SDCard
 	    #define DMA_M2P					0x00000000
@@ -136,7 +134,8 @@ S32 ReadSectors(U32 block, U32 blocknum, U8 *outaddr)
 	*P_DMA_CR1 = 0x0000;
 	
 	realaddr = (U32 *)((U32)outaddr & 0x8fffffff);
-	invalid_cache((U32)realaddr);
+	dcache_invalidate_all();
+	//invalid_cache((U32)realaddr);
 	
 	if (WaitSDStatus(MASK_S_DataComplete)) 
 	{
@@ -345,9 +344,7 @@ S32 SDDrv_GetSpeed(void)
 
 
 S32 SDDrv_Initial(void)
-{
-	tv_print(fba, 28, 2, "SD INIT");
-	
+{	
 	S32 	i, loopcnt=0;
 	U32 	response[4];
 	
@@ -362,30 +359,21 @@ S32 SDDrv_Initial(void)
 
 	// Disable All SD Interrupt
 	*P_SDC_IntEn = 0x0000;
-    tv_print(fba, 28, 3, "SD ints disabled");
 
 	// Step 1, Reset SD Controller
 	*P_SDC_Control = MASK_C_BlockLen_512bytes|INIT_ClockSpeedFactor1|MASK_C_ENSDBus|MASK_C_DMAMode;
-
-    tv_print(fba, 28, 4, "SD Controller reset");
-   
+  
 	// Clear All Command
 	*P_SDC_Command = MASK_CMDSTOP;
 	while (*P_SDC_Status & 0x1);
-	
-	tv_print(fba, 28, 5, "SD Commands cleared");
 	   
 	// Clear All Status
 	*P_SDC_Status = MASK_S_ClrAllBits;
-	
-	tv_print(fba, 28, 6, "SD status cleared");
 	   
 	loopcnt = 0;
 
 	// Step 2, Start 64 cycles on SD Clk Bus
 	*P_SDC_Command = MASK_ClockCycle74;
-
-    tv_print(fba, 28, 7, "SD 64 CLK cycles started");
        
 	if (WaitSDStatus(MASK_S_CmdComplete)) 
 		return 1;
@@ -401,8 +389,6 @@ S32 SDDrv_Initial(void)
 
 	loopcnt = 0;
 	cardtype = SDCARD;
-
-    tv_print(fba, 28, 8, "SD Waiting for CMD complete");
     
 	// Step 4, Run ACMD 41 until card finish power up sequence
 	do
@@ -423,8 +409,6 @@ S32 SDDrv_Initial(void)
 		loopcnt = loopcnt + 1;
 	} while (((response[0] & 0x80000000) == 0) && loopcnt < 20000);
 
-    tv_print(fba, 28, 9, "SD WE NOT HERE");
-    
 	if (loopcnt == 20000) 
 		return 0;
 

@@ -13,6 +13,7 @@ INPUT("Debug\sys_irq.o")
 INPUT("Debug\i2c.o")
 INPUT("Debug\discpu_funcs.o")
 INPUT("Debug\change_clk.o")
+INPUT("Debug\cache.o")
 
 SECTIONS
 {

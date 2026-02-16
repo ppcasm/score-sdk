@@ -36,6 +36,7 @@ void tv_clearscreen(unsigned short *fb){
 #define PPU_HVGA		0x00000002
 #define PPU_VGA2CIF		0x00000003
 #define PPUEN			0x00001000
+#define BLK_ST_EN       (1u << 0)
 
 void tv_init(unsigned int resolution, unsigned int colormode, unsigned int fb1_addr, unsigned int fb2_addr, unsigned int fb3_addr){
 	*P_TV_CLK_CONF = C_TV_CLK_EN | C_TV_RST_DIS; 	
@@ -62,6 +63,11 @@ void tv_init(unsigned int resolution, unsigned int colormode, unsigned int fb1_a
 	tv_buffer_set(fb1_addr, fb2_addr, fb3_addr);
 	tv_clearscreen((unsigned short *)fb1_addr);
 	tv_buffer_sel(0);
+	
+	// Enable PPU and VBlank Start interrupt
+	*P_PPU_CONTROL |= PPUEN;
+    *P_IRQ_CONTROL |= BLK_ST_EN;
+
 }
 
 // =============================================================
