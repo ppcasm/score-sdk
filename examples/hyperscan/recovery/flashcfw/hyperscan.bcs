@@ -15,7 +15,7 @@ Search Header File=0
 OUTPUT_TYPE=1
 COMPILER_PATH=C:\Sunplus\S_CORE~1.1\GNU\bin\gcc
 DEF_COMPILER_PARA=-mscore7 -mel -g -Wall -nostartfiles
-ADD_COMPILER_PARA=-Dhyperscan
+ADD_COMPILER_PARA=-Dhyperscan -Dmax_heap_size=(128*1024)
 ASM_PATH=C:\Sunplus\S_CORE~1.1\GNU\bin\as
 DEF_ASM_PARA=-Wa,-gdwarf-2  -x assembler-with-cpp
 ADD_ASM_PARA=

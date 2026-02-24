@@ -93,7 +93,7 @@ void _exit (int extcode){
 #ifdef max_heap_size
 	#define HEAPSIZE max_heap_size
 #else
-	#define HEAPSIZE ((128*1024))
+	#define HEAPSIZE (1024*1024)
 #endif
 static unsigned char _heap[HEAPSIZE];
 char * _sbrk_r (struct _reent *ptr, int nbytes){

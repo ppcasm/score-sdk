@@ -31,11 +31,11 @@ OBJDUMP FLag =
 IMG2BIN = ..\S_CORE~1.1\GNU\bin\img2bin
 IMG2BIN FLag = 
 Lik Lib = 
-Stack base address = a0fffff0
+Stack base address = a0fffffc
 Pre-Link Description = 
 Pre-Link Command = 
 Post-Build Description = makehyper
-Post-Build Command = 	cd ./Debug && move hyperscan.elf.bin Hyper.Exe	cd ./Debug && move Hyper.Exe d:/usbload.bin
+Post-Build Command = 	cd ./Debug && move hyperscan.elf.bin Hyper.Exe	cd ./Debug && copy Hyper.Exe D:\apps\intdemo\Hyper.Exe
 Custom Build Enable = 0
 WorkDir = 
 Custom Build = 
@@ -65,7 +65,7 @@ Remote_Manner = Serial
 Remote_Manner = 
 Enable OSInfo = 0
 OSInfo Dll = 
-Project Path = C:\Users\ppcasm\Documents\score-sdk\examples\hyperscan\all\testing
+Project Path = C:\Users\ppcasm\Documents\score-sdk\examples\hyperscan\all\hw
 OSInfo INIT = 
 Show Cycles = 0
 Exception Debug = 0
@@ -164,11 +164,87 @@ Address Check = 0
 # Begin Group "Source Files"
 #PROP Default_Filter = c;cpp;cc;C;cxx;asm;s;
 
+# Begin Group "hyperscan"
+#PROP Default_Filter = 
+
+# Begin Group "fatfs"
+#PROP Default_Filter = 
+
+# Begin Source File
+SOURCE=..\..\..\..\src\hyperscan\fatfs\diskio.c
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# Begin Source File
+SOURCE=..\..\..\..\src\hyperscan\fatfs\ff.c
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# End Group
+# Begin Group "hs_controller"
+#PROP Default_Filter = 
+
+# Begin Source File
+SOURCE=..\..\..\..\src\hyperscan\hs_controller\hs_controller.c
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# End Group
+# End Group
+# Begin Group "i2c"
+#PROP Default_Filter = 
+
+# Begin Source File
+SOURCE=..\..\..\..\src\i2c\i2c.c
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# End Group
+# Begin Group "irq"
+#PROP Default_Filter = 
+
+# Begin Source File
+SOURCE=..\..\..\..\src\irq\sys_irq.c
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# Begin Source File
+SOURCE=..\..\..\..\src\irq\sys_isr.s
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# End Group
+# Begin Group "tv"
+#PROP Default_Filter = 
+
+# Begin Source File
+SOURCE=..\..\..\..\src\tv\tv.c
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# End Group
 # Begin Group "uart"
 #PROP Default_Filter = 
 
 # Begin Source File
 SOURCE=..\..\..\..\src\uart\uart.c
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# End Group
+# Begin Group "cpu"
+#PROP Default_Filter = *.c
+
+# Begin Source File
+SOURCE=..\..\..\..\src\cpu\cache.c
 USEPARAM=FALSE
 PARAM=
 # End Source File
@@ -190,8 +266,106 @@ PARAM=
 # Begin Group "Header Files"
 #PROP Default_Filter = h;inc;
 
+# Begin Group "hyperscanH"
+#PROP Default_Filter = 
+
+# Begin Group "fatfsH"
+#PROP Default_Filter = 
+
+# Begin Source File
+SOURCE=..\..\..\..\include\hyperscan\fatfs\diskio.h
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# Begin Source File
+SOURCE=..\..\..\..\include\hyperscan\fatfs\ff.h
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# Begin Source File
+SOURCE=..\..\..\..\include\hyperscan\fatfs\ffconf.h
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# End Group
+# Begin Group "hs_controllerH"
+#PROP Default_Filter = 
+
+# Begin Source File
+SOURCE=..\..\..\..\include\hyperscan\hs_controller\hs_controller.h
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# End Group
+# End Group
+# Begin Group "i2cH"
+#PROP Default_Filter = 
+
+# Begin Source File
+SOURCE=..\..\..\..\include\i2c\i2c.h
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# End Group
+# Begin Group "irqH"
+#PROP Default_Filter = 
+
+# Begin Source File
+SOURCE=..\..\..\..\include\irq\interrupts.h
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# End Group
+# Begin Group "norflashH"
+#PROP Default_Filter = 
+
+# Begin Source File
+SOURCE=..\..\..\..\include\norflash\norflash.h
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# End Group
+# Begin Group "tvH"
+#PROP Default_Filter = 
+
+# Begin Source File
+SOURCE=..\..\..\..\include\tv\font_8x16.h
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# Begin Source File
+SOURCE=..\..\..\..\include\tv\tv.h
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# End Group
+# Begin Group "uartH"
+#PROP Default_Filter = 
+
 # Begin Source File
 SOURCE=..\..\..\..\include\uart\uart.h
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# End Group
+# Begin Source File
+SOURCE=..\..\..\..\include\score7_constants.h
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# Begin Source File
+SOURCE=..\..\..\..\include\score7_registers.h
 USEPARAM=FALSE
 PARAM=
 # End Source File

@@ -15,7 +15,7 @@ SECTIONS
   } = 0
   
   /* S+core IDE writed LD file begin */
-    .stack         0xA0FFFFF0 :{ _stack = .; *(.stack) }
+    .stack         0xA0FFFFFC :{ _stack = .; *(.stack) }
   /* S+core IDE writed LD file end */
   /* Read-only sections, merged into text segment: */
   . = 0xA0001000;

@@ -79,8 +79,6 @@ S32 SDCommandr2(U32 commandset, U32 arg, U32* outaddr)
 	return 0;
 }
 
-extern void invalid_cache(U32 addr);
-
 S32 SDDrv_ReadSector(U32 sector, U32 sector_num, U8 *buf)
 {
 	S32 i, ret;

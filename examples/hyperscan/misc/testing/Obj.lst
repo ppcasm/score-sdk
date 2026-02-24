@@ -3,8 +3,6 @@
 
 INPUT("Debug\hyperscan_startup.o")
 INPUT("Debug\main.o")
-INPUT("Debug\libgloss.o")
-INPUT("Debug\uart.o")
 
 SECTIONS
 {

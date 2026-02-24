@@ -223,8 +223,8 @@ const unsigned int flash_patch[] = {
 0x83BDF02B,
 // Addr: 0x9F0001AC - Insn: mtcr r29, cr29
 0x9BBD8000,
-// Addr: 0x9F0001B0 - Insn: b 0x9f0001b0
-0x9000BC00,
+// Addr: 0x9F0001B0 - Old Insn: b 0x9f0001b0 | New Insn: b 0x9f000234 NOTE: We patch here for JTAG fallthrough
+0x9000BC84, // Old: 0x9000BC00,
 // Addr: 0x9F0001B4 - Insn: br r30
 0x801EBC08,
 // Addr: 0x9F0001B8 - Insn: nop!

@@ -7,12 +7,6 @@
 
 controllerunion controller[1];
 
-/*
-	These are the data ports used by the HyperScan controller. It
-	seems like only 0~3 are really used, but responses seem to hang
-	if you don't actually read all of the I2C data ports, so we do that
-*/
-
 //=============================================================
 // void hs_controller_init(void);
 //

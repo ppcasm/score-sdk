@@ -43,9 +43,9 @@ typedef unsigned short u16;
 typedef unsigned int u32;
 typedef volatile u32 vu32;
 
-typedef enum {
-	false = 0, true = 1
-} bool;
+//typedef enum {
+//	false = 0, true = 1
+//} bool;
 
 static void uart_enable_interface() {
 	*P_UART_INTERFACE_SEL |= SW_UART_UART;

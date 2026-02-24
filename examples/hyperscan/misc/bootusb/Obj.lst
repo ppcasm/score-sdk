@@ -4,13 +4,6 @@
 INPUT("Debug\hyperscan_startup.o")
 INPUT("Debug\main.o")
 INPUT("Debug\libgloss.o")
-INPUT("Debug\uart.o")
-INPUT("Debug\tv.o")
-INPUT("Debug\norflash.o")
-INPUT("Debug\sys_isr.o")
-INPUT("Debug\sys_irq.o")
-INPUT("Debug\i2c.o")
-INPUT("Debug\hs_controller.o")
 INPUT("Debug\ff.o")
 INPUT("Debug\diskio.o")
 

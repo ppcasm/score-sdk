@@ -12,7 +12,7 @@ OutPut Dir = Debug
 Inc Path = ..\..\..\..\include
 Lib Path = 
 Compiler = ..\S_CORE~1.1\GNU\bin\gcc
-Compiler DefFlag = -mscore7 -mel -g -Wall -nostartfiles
+Compiler DefFlag = -mscore7 -mel -g -Wall
 Compiler AddFlag = -Dhyperscan
 Assembler = ..\S_CORE~1.1\GNU\bin\as
 Assembler DefFlag = -Wa,-gdwarf-2  -x assembler-with-cpp
@@ -55,7 +55,7 @@ Remote_Device = COM1
 BOOL_CUSTOM_CMD = 0
 STR_CUSTOM_CMD = 
 Parallel = LPT1
-Device = Ice
+Device = Simulator
 TCP_Address = 
 TCP_Port = 
 Serial_Device = 
@@ -250,6 +250,12 @@ PARAM=
 # End Source File
 
 # End Group
+# Begin Source File
+SOURCE=..\..\..\..\src\cpu\cache.c
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
 # Begin Source File
 SOURCE=..\..\..\..\src\libgloss.c
 USEPARAM=FALSE

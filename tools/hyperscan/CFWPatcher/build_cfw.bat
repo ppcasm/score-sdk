@@ -1,0 +1,1 @@
+python cfwpatcher.py file OFW.bin CFW.bin --inject .\binpatches\loadusb.bin@0xA00F5D00 --inject .\binpatches\testmenu_uartldr.bin@0xA00FBB78 --jump "0xA00112AC->0xA00FBB78:jl"

@@ -4,6 +4,7 @@
 INPUT("Debug\hyperscan_startup.o")
 INPUT("Debug\main.o")
 INPUT("Debug\libgloss.o")
+INPUT("Debug\cache.o")
 INPUT("Debug\uart.o")
 INPUT("Debug\tv.o")
 INPUT("Debug\norflash.o")

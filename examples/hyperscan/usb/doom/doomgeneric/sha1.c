@@ -81,7 +81,7 @@ static void Transform(sha1_context_t *hd, byte *data)
 #endif
 
 
-#define K1  0x5A827999L
+#define K1_SHA  0x5A827999L
 #define K2  0x6ED9EBA1L
 #define K3  0x8F1BBCDCL
 #define K4  0xCA62C1D6L
@@ -102,26 +102,26 @@ static void Transform(sha1_context_t *hd, byte *data)
 				      + m;	      \
 				 b = rol( b, 30 );    \
 			       } while(0)
-    R( a, b, c, d, e, F1, K1, x[ 0] );
-    R( e, a, b, c, d, F1, K1, x[ 1] );
-    R( d, e, a, b, c, F1, K1, x[ 2] );
-    R( c, d, e, a, b, F1, K1, x[ 3] );
-    R( b, c, d, e, a, F1, K1, x[ 4] );
-    R( a, b, c, d, e, F1, K1, x[ 5] );
-    R( e, a, b, c, d, F1, K1, x[ 6] );
-    R( d, e, a, b, c, F1, K1, x[ 7] );
-    R( c, d, e, a, b, F1, K1, x[ 8] );
-    R( b, c, d, e, a, F1, K1, x[ 9] );
-    R( a, b, c, d, e, F1, K1, x[10] );
-    R( e, a, b, c, d, F1, K1, x[11] );
-    R( d, e, a, b, c, F1, K1, x[12] );
-    R( c, d, e, a, b, F1, K1, x[13] );
-    R( b, c, d, e, a, F1, K1, x[14] );
-    R( a, b, c, d, e, F1, K1, x[15] );
-    R( e, a, b, c, d, F1, K1, M(16) );
-    R( d, e, a, b, c, F1, K1, M(17) );
-    R( c, d, e, a, b, F1, K1, M(18) );
-    R( b, c, d, e, a, F1, K1, M(19) );
+    R( a, b, c, d, e, F1, K1_SHA, x[ 0] );
+    R( e, a, b, c, d, F1, K1_SHA, x[ 1] );
+    R( d, e, a, b, c, F1, K1_SHA, x[ 2] );
+    R( c, d, e, a, b, F1, K1_SHA, x[ 3] );
+    R( b, c, d, e, a, F1, K1_SHA, x[ 4] );
+    R( a, b, c, d, e, F1, K1_SHA, x[ 5] );
+    R( e, a, b, c, d, F1, K1_SHA, x[ 6] );
+    R( d, e, a, b, c, F1, K1_SHA, x[ 7] );
+    R( c, d, e, a, b, F1, K1_SHA, x[ 8] );
+    R( b, c, d, e, a, F1, K1_SHA, x[ 9] );
+    R( a, b, c, d, e, F1, K1_SHA, x[10] );
+    R( e, a, b, c, d, F1, K1_SHA, x[11] );
+    R( d, e, a, b, c, F1, K1_SHA, x[12] );
+    R( c, d, e, a, b, F1, K1_SHA, x[13] );
+    R( b, c, d, e, a, F1, K1_SHA, x[14] );
+    R( a, b, c, d, e, F1, K1_SHA, x[15] );
+    R( e, a, b, c, d, F1, K1_SHA, M(16) );
+    R( d, e, a, b, c, F1, K1_SHA, M(17) );
+    R( c, d, e, a, b, F1, K1_SHA, M(18) );
+    R( b, c, d, e, a, F1, K1_SHA, M(19) );
     R( a, b, c, d, e, F2, K2, M(20) );
     R( e, a, b, c, d, F2, K2, M(21) );
     R( d, e, a, b, c, F2, K2, M(22) );

@@ -26,8 +26,10 @@ This is part of the Mattel HyperScan SDK by ppcasm (ppcasm@gmail.com)
 #define LOAD_ADDRESS 0xA00901FC
 #define ENTRY_ADDRESS 0xA0091000
 
+extern void _start(void);
+void (*entry)(void) = _start;
+
 static FATFS fs0; //FatFS mountpoint
-static FIL callback_fil;
 
 void draw_pixel(unsigned short* framebuffer, int x, int y, unsigned short color) {
     if (x >= 0 && x < FRAMEBUFFER_WIDTH && y >= 0 && y < FRAMEBUFFER_HEIGHT) {
@@ -231,10 +233,10 @@ void execute_binary(char *dir_buf){
     // Unmount the file system
     f_mount(NULL, "", 0);
 	
-	*(volatile unsigned int*)0xa009108c = 0x00000000;
-	*(volatile unsigned int*)0xa0091090 = 0x00000000;
-	*(volatile unsigned int*)0x8009108c = 0x00000000;
-	*(volatile unsigned int*)0x80091090 = 0x00000000;
+	//*(volatile unsigned int*)0xa009108c = 0x00000000;
+	//*(volatile unsigned int*)0xa0091090 = 0x00000000;
+	//*(volatile unsigned int*)0x8009108c = 0x00000000;
+	//*(volatile unsigned int*)0x80091090 = 0x00000000;
 	
 	entry_start();
 }
@@ -257,75 +259,6 @@ static inline unsigned int asm_j_insn(unsigned int address, unsigned int link) {
     return assembled;
 }
 
-int iso_init_callback() {
-	asm("la r18, _gp");
-	
-	HS_LEDS(0x01);
-	printf("iso_init... Go fuck yourself\n");
-	return 1;
-}
-
-int iso_open_callback(char *filename) {
-	asm("la r28, _gp");
-	
-	FRESULT res; // FatFs result variable
-
-	HS_LEDS(0x02);
-	printf("iso_open: %s\n", filename);
-	
-    // Mount the file system
-    res = f_mount(&fs0, "", 1);
-    
-    if (res != FR_OK) {
-        printf("Failed to mount the file system. Error code: %d\n", res);
-        while(1);
-    }
-
-    res = f_open(&callback_fil, filename, FA_READ);
-    
-    return 1;
-}
-
-void iso_read_callback(int filedes, void *buffer, unsigned int size) {
-	asm("la r28, _gp");
-
-	FRESULT res; // FatFs result variable
-	UINT br;
-	
-	HS_LEDS(0x04);
-
-	printf("iso_read: filedes(%x) | buffer{%p) | size(%x)\n", filedes, buffer, size);
-	
-	res = f_read(&callback_fil, buffer, size, &br);
-	
-    // Close the directory
-    f_close(&callback_fil);
-}
-
-int iso_lseek_callback(int fd, int offset, int whence) {
-	asm("la r28, _gp");
-	HS_LEDS(0x08);
-	
-	while(1) { printf("iso_lseek");}
-	
-	return 0;
-}
-
-void iso_close_callback(int filedes) {
-	asm("la r28, _gp");
-	HS_LEDS(0xF0);
-	
-	printf("iso_close()\n");
-
-    // Unmount the file system
-    f_mount(NULL, "", 0);
-}
-
-int wtf_callback() {
-	printf("WTF...\n");
-	return 0;
-}
-
 int main(){
 
 	unsigned short *fb = (unsigned short *)FRAMEBUFFER_ADDRESS;
@@ -346,200 +279,84 @@ int main(){
 	/* Initalize Mattel HyperScan controller interface */
 	hs_controller_init();
 	
-	// If start is held at boot of usbload then continue as normal
+	// If start is held at boot of usbload then patch Hyperscan OS and reload this
 	hs_controller_read();
 	
-	if(controller[hs_controller_1].input.ls && controller[hs_controller_1].input.rs){
-		printf("Dumping RAM...\n");
-		
-		UINT bw;
-		FIL fil;
-		FRESULT res; // FatFs result variable
-
-		unsigned char *ram_ptr = (unsigned char *)0xA0000000;
-		unsigned int chunk_size = (4 * 1024);
-		unsigned int total_sectors = (16 * (1024 * 1024)) / chunk_size;
-		unsigned char save_buffer[chunk_size];
-		
-		int count = 0;
-		
-	    // Mount the file system
-		res = f_mount(&fs0, "", 1);
-    
-		if (res != FR_OK) {
-			printf("Failed to mount the file system. Error code: %d\n", res);
-			while(1);
-		}
-		
-		res = f_open(&fil, "ramdump.bin", FA_WRITE | FA_CREATE_ALWAYS);
-		if (res != FR_OK) {
-			printf("Failed to open the file. Error code: %d\n", res);
-			while(1);    
-    	}
-    	
-    	for(count=0;count<total_sectors;count++) {
-    		
-    		memcpy((void *)save_buffer, (const void *)ram_ptr, chunk_size);
-    		
-    		res = f_write(&fil, save_buffer, chunk_size, &bw);
-    		
-    		if(res != FR_OK || bw < chunk_size) {
-    			printf("Failed to write the file. Error code: %d\n", res);
-    			f_close(&fil);
-    			while(1); 
-    		}
-    		
-    		ram_ptr += chunk_size;
-    		printf("Sector: %d - Addr: %p\n", count, ram_ptr);
-
-			res = f_sync(&fil);
-    		if(res != FR_OK) {
-				printf("Failed to commit. Error code: %d\n", res);
-			f_close(&fil);
-			while(1);
-    		}
-    	}
-    	
-		printf("Done!\n");
-	}
-	
 	if(controller[hs_controller_1].input.start){
-		//int i = 0;
-		/*
-		volatile unsigned int *src = (volatile unsigned int *)0x9F001000;
-		volatile unsigned int *dst = (volatile unsigned int *)0x800001FC;
-		unsigned int n = (0xFF000 / 4);
-
-		// invalidate D-Cache
-		asm("cache 0x18, [r15, 0]");
-		asm("nop");
-		asm("nop!");
-		asm("nop!");
-		asm("nop!");
-		asm("nop!");
-		asm("nop");
 		
-		//	invalidate I-Cache
-		asm("cache 0x10, [r15, 0]");
-		asm("nop");
-		asm("nop!");
-		asm("nop!");
-		asm("nop!");
-		asm("nop!");
-		asm("nop");
-
-		// Drain write buffer
-		asm("cache 0x1A, [r15, 0]");
-		asm("nop");
-		asm("nop!");
-		asm("nop!");
-		asm("nop!");
-		asm("nop!");
-		asm("nop");
-		
-		for(i = 0; i < n; i++) {
-			// CDROM ring buffer 0x8005d000~0x8006feff
-			if(i >= 0x5CE04 && i <= 0x6FD03){
-				printf("HERE\n");
-				continue;
-			}
-			dst[i] = src[i];
-		}
-		
-		// invalidate D-Cache
-		asm("cache 0x18, [r15, 0]");
-		asm("nop");
-		asm("nop!");
-		asm("nop!");
-		asm("nop!");
-		asm("nop!");
-		asm("nop");
-		
-		//	invalidate I-Cache
-		asm("cache 0x10, [r15, 0]");
-		asm("nop");
-		asm("nop!");
-		asm("nop!");
-		asm("nop!");
-		asm("nop!");
-		asm("nop");
-
-		// Drain write buffer
-		asm("cache 0x1A, [r15, 0]");
-		asm("nop");
-		asm("nop!");
-		asm("nop!");
-		asm("nop!");
-		asm("nop!");
-		asm("nop");
-		*/
-		// You could place firmware patches here that would get applied before booting HyperScanOS
-
-		// Patch iso_init callback
-		*(volatile unsigned int *)0x80000890 = 0x00000000; 
-		*(volatile unsigned int *)0x80000894 = 0x00000000;
-		*(volatile unsigned int *)0x80000898 = asm_j_insn((unsigned int)iso_init_callback, 0);
-
-		// Patch iso_open callback
-		*(volatile unsigned int *)0x8000089C = 0x00000000;
-		*(volatile unsigned int *)0x800008A0 = 0x00000000;
-		*(volatile unsigned int *)0x800008A4 = asm_j_insn((unsigned int)iso_open_callback, 0);
-
-		// Patch iso_read callback
-		*(volatile unsigned int *)0x800008A8 = 0x00000000;
-		*(volatile unsigned int *)0x800008AC = 0x00000000;
-		*(volatile unsigned int *)0x800008B0 = asm_j_insn((unsigned int)iso_read_callback, 0);
-
-		// Patch iso_lseek callback
-		*(volatile unsigned int *)0x800008B4 = 0x00000000;
-		*(volatile unsigned int *)0x800008B8 = 0x00000000;
-		*(volatile unsigned int *)0x800008BC = asm_j_insn((unsigned int)iso_lseek_callback, 0);
-
-		// Patch iso_close callback
-		*(volatile unsigned int *)0x800008C0 = 0x00000000;
-		*(volatile unsigned int *)0x800008C4 = 0x00000000;
-		*(volatile unsigned int *)0x800008C8 = asm_j_insn((unsigned int)iso_close_callback, 0);
-
-		// Patch wtf callback
-		*(volatile unsigned int *)0x80000AC4 = 0x00000000;
-		*(volatile unsigned int *)0x80000AC8 = 0x00000000;
-		*(volatile unsigned int *)0x80000ACC = asm_j_insn((unsigned int)wtf_callback, 0);
+	    unsigned int i = 0;
 	
-		// Patch checksum
-		*(volatile unsigned int *)0x8000F740 = 0x84B88018;
-		
-		// Patch system test
-		//*(volatile unsigned int *)0x80012360 = asm_j_insn(0xA005E000, 1); 
-		
-		// invalidate D-Cache
-		asm("cache 0x18, [r15, 0]");
-		asm("nop");
-		asm("nop!");
-		asm("nop!");
-		asm("nop!");
-		asm("nop!");
-		asm("nop");
-		
-		//	invalidate I-Cache
-		asm("cache 0x10, [r15, 0]");
-		asm("nop");
-		asm("nop!");
-		asm("nop!");
-		asm("nop!");
-		asm("nop!");
-		asm("nop");
+	    volatile unsigned int *src = (volatile unsigned int *)0x9F001000;
+	    volatile unsigned int *dst = (volatile unsigned int *)0x800001FC;
+	    unsigned int n = (0xFF000 / 4);
 
-		// Drain write buffer
-		asm("cache 0x1A, [r15, 0]");
-		asm("nop");
-		asm("nop!");
-		asm("nop!");
-		asm("nop!");
-		asm("nop!");
-		asm("nop");
+        // invalidate D-Cache
+	    asm("cache 0x18, [r15, 0]");
+	    asm("nop");
+	    asm("nop!");
+	    asm("nop!");
+	    asm("nop!");
+	    asm("nop!");
+	    asm("nop");
 		
-		void (*entry_start)(void) = (void *)0xA0001000;
-		entry_start();
+	    // invalidate I-Cache
+	    asm("cache 0x10, [r15, 0]");
+	    asm("nop");
+	    asm("nop!");
+	    asm("nop!");
+	    asm("nop!");
+	    asm("nop!");
+	    asm("nop");
+
+	    // Drain write buffer
+	    asm("cache 0x1A, [r15, 0]");
+	    asm("nop");
+	    asm("nop!");
+	    asm("nop!");
+	    asm("nop!");
+	    asm("nop!");
+	    asm("nop");
+	    		
+	    for(i = 0; i < n; i++) {
+		    // Skip CDROM ring buffer (0x8005d000~0x8006feff)
+		    if(i >= 0x5CE04 && i <= 0x6FD03){
+			    continue;
+		    }
+		    dst[i] = src[i];
+	    }
+        
+	    // You could place firmware patches here that would get applied before booting HyperScanOS
+		*(volatile unsigned int *)0x80012828 = asm_j_insn((volatile unsigned int)0xA00F5D00, 1);
+
+	    // invalidate D-Cache
+	    asm("cache 0x18, [r15, 0]");
+	    asm("nop");
+	    asm("nop!");
+	    asm("nop!");
+	    asm("nop!");
+	    asm("nop!");
+	    asm("nop");
+		
+	    // invalidate I-Cache
+	    asm("cache 0x10, [r15, 0]");
+	    asm("nop");
+	    asm("nop!");
+	    asm("nop!");
+	    asm("nop!");
+	    asm("nop!");
+	    asm("nop");
+
+	    // Drain write buffer
+	    asm("cache 0x1A, [r15, 0]");
+	    asm("nop");
+	    asm("nop!");
+	    asm("nop!");
+	    asm("nop!");
+	    asm("nop!");
+	    asm("nop");
+	
+	    void (*entry_start)(void) = (void *)0xA0001000;
+	    entry_start();
 	}
 	
 	/*
@@ -556,48 +373,13 @@ int main(){
     menu_border(fb, (FRAMEBUFFER_WIDTH - 250) / 2, 20 + (FRAMEBUFFER_HEIGHT - 320) / 2, 250, 320, 1, 6, 0xFFFF); 
 
 	dir_count = get_dir_list_size();
-
+	
 	char *dir_buf[dir_count];
 	
 	load_directory_list(dir_buf);
 	
 	show_selection(dir_buf, dir_count, 0, selection);
 
-	//*(volatile unsigned int *)0x8000C62C = 0x10804084;
-	//*(volatile unsigned int *)0x8000C630 = 0x00002300;
-	//*(volatile unsigned int *)0x8000C634 = 0x0a230a22;
-	//*(volatile unsigned int *)0x8000C638 = 0x0000340f;
-	
-	// Patch iso_init callback
-	*(volatile unsigned int *)0x80000890 = 0x00000000; 
-	*(volatile unsigned int *)0x80000894 = 0x00000000;
-	*(volatile unsigned int *)0x80000898 = asm_j_insn((unsigned int)iso_init_callback, 0);
-		
-	// Patch iso_open callback
-	*(volatile unsigned int *)0x8000089C = 0x00000000;
-	*(volatile unsigned int *)0x800008A0 = 0x00000000;
-	*(volatile unsigned int *)0x800008A4 = asm_j_insn((unsigned int)iso_open_callback, 0);
-
-	// Patch iso_read callback
-	*(volatile unsigned int *)0x800008A8 = 0x00000000;
-	*(volatile unsigned int *)0x800008AC = 0x00000000;
-	*(volatile unsigned int *)0x800008B0 = asm_j_insn((unsigned int)iso_read_callback, 0);
-
-	// Patch iso_lseek callback
-	*(volatile unsigned int *)0x800008B4 = 0x00000000;
-	*(volatile unsigned int *)0x800008B8 = 0x00000000;
-	*(volatile unsigned int *)0x800008BC = asm_j_insn((unsigned int)iso_lseek_callback, 0);
-
-	// Patch iso_close callback
-	*(volatile unsigned int *)0x800008C0 = 0x00000000;
-	*(volatile unsigned int *)0x800008C4 = 0x00000000;
-	*(volatile unsigned int *)0x800008C8 = asm_j_insn((unsigned int)iso_close_callback, 0);
-
-	// Patch wtf callback
-	*(volatile unsigned int *)0x80000AC4 = 0x00000000;
-	*(volatile unsigned int *)0x80000AC8 = 0x00000000;
-	*(volatile unsigned int *)0x80000ACC = asm_j_insn((unsigned int)wtf_callback, 0);
-		
 	while(1){
 		
 		// If right trigger is pressed, move menu select down

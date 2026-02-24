@@ -12,7 +12,7 @@ OutPut Dir = Debug
 Inc Path = ..\..\..\..\include
 Lib Path = 
 Compiler = ..\S_CORE~1.1\GNU\bin\gcc
-Compiler DefFlag = -mscore7 -mel -g -Wall -nostdlib -O2
+Compiler DefFlag = -mscore7 -mel -g -Wall -nostdlib -O1
 Compiler AddFlag = -Dhyperscan
 Assembler = ..\S_CORE~1.1\GNU\bin\as
 Assembler DefFlag = -Wa,-gdwarf-2  -x assembler-with-cpp
@@ -35,7 +35,7 @@ Stack base address = a0fffff0
 Pre-Link Description = 
 Pre-Link Command = 
 Post-Build Description = makehyper
-Post-Build Command = 	cd ./Debug && move hyperscan.elf.bin Hyper.Exe	cd ./Debug && del *.o *.bin *.elf *.map *.d *.srec *.dbg *.res
+Post-Build Command = 	cd ./Debug && move hyperscan.elf.bin Hyper.Exe	cd ./Debug && del *.o *.bin *.elf *.map *.d *.srec *.dbg *.res	cd ./Debug && copy Hyper.Exe ..\..\..\..\..\tools\hyperscan\CFWPatcher\binpatches\loadusb.bin
 Custom Build Enable = 0
 WorkDir = 
 Custom Build = 
@@ -183,72 +183,6 @@ PARAM=
 # End Source File
 
 # End Group
-# Begin Group "hs_controller"
-#PROP Default_Filter = 
-
-# Begin Source File
-SOURCE=..\..\..\..\src\hyperscan\hs_controller\hs_controller.c
-USEPARAM=FALSE
-PARAM=
-# End Source File
-
-# End Group
-# End Group
-# Begin Group "i2c"
-#PROP Default_Filter = 
-
-# Begin Source File
-SOURCE=..\..\..\..\src\i2c\i2c.c
-USEPARAM=FALSE
-PARAM=
-# End Source File
-
-# End Group
-# Begin Group "irq"
-#PROP Default_Filter = 
-
-# Begin Source File
-SOURCE=..\..\..\..\src\irq\sys_irq.c
-USEPARAM=FALSE
-PARAM=
-# End Source File
-
-# Begin Source File
-SOURCE=..\..\..\..\src\irq\sys_isr.s
-USEPARAM=FALSE
-PARAM=
-# End Source File
-
-# End Group
-# Begin Group "norflash"
-#PROP Default_Filter = 
-
-# Begin Source File
-SOURCE=..\..\..\..\src\norflash\norflash.c
-USEPARAM=FALSE
-PARAM=
-# End Source File
-
-# End Group
-# Begin Group "tv"
-#PROP Default_Filter = 
-
-# Begin Source File
-SOURCE=..\..\..\..\src\tv\tv.c
-USEPARAM=FALSE
-PARAM=
-# End Source File
-
-# End Group
-# Begin Group "uart"
-#PROP Default_Filter = 
-
-# Begin Source File
-SOURCE=..\..\..\..\src\uart\uart.c
-USEPARAM=FALSE
-PARAM=
-# End Source File
-
 # End Group
 # Begin Source File
 SOURCE=..\..\..\..\src\libgloss.c

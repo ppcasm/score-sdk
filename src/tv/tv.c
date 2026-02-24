@@ -2,6 +2,7 @@
 #include "score7_constants.h"
 #include "tv/tv.h"
 #include "tv/font_8x16.h"
+#include "cpu/cache.h"
 
 // =============================================================
 //	void tv_clearscreen(unsigned short *fb)
@@ -30,7 +31,6 @@ void tv_clearscreen(unsigned short *fb){
 //
 //	void return
 // =============================================================
-// P_PPU_Control
 #define PPU_QVGA		0x00000000
 #define PPU_VGA			0x00000001
 #define PPU_HVGA		0x00000002
@@ -38,24 +38,27 @@ void tv_clearscreen(unsigned short *fb){
 #define PPUEN			0x00001000
 #define BLK_ST_EN       (1u << 0)
 
-void tv_init(unsigned int resolution, unsigned int colormode, unsigned int fb1_addr, unsigned int fb2_addr, unsigned int fb3_addr){
-	*P_TV_CLK_CONF = C_TV_CLK_EN | C_TV_RST_DIS; 	
+void tv_init(unsigned int Resolution, unsigned int ColorMode, unsigned int fb1_addr, unsigned int fb2_addr, unsigned int fb3_addr){
+	
+	*P_TV_CLK_CONF = C_TV_CLK_EN | C_TV_RST_DIS;
+	
+	*P_TV_VIDEODAC_CTRL = C_TV_VIDEODAC_EN; 
 	
 	*P_TV_MODE_CTRL = C_TV_CTRL_EN 			
 					| C_TV_NTSC_MODE 				
 					| C_TV_INTERLACE_MODE 
 					| C_TV_NTSC_TYPE 		
-					| C_TV_LITTLE_ENDIAN;	
+					| C_TV_LITTLE_ENDIAN; 	
 
-	if(resolution == RESOLUTION_640_480){
+	if(Resolution == RESOLUTION_640_480){
 		*P_TV_MODE_CTRL |= C_TV_VGA_MODE;
 	}
 	
-	if(resolution == RESOLUTION_320_240){
+	if(Resolution == RESOLUTION_320_240){
 		*P_TV_MODE_CTRL |= C_TV_QVGA_MODE;
 	}
 	
-	if(colormode == COLOR_RGB565){
+	if(ColorMode == COLOR_RGB565){
 		*P_TV_MODE_CTRL	|= 	C_TV_RGB_MODE 				
 							| C_TV_RGB565_MODE;
 	}
@@ -64,10 +67,9 @@ void tv_init(unsigned int resolution, unsigned int colormode, unsigned int fb1_a
 	tv_clearscreen((unsigned short *)fb1_addr);
 	tv_buffer_sel(0);
 	
-	// Enable PPU and VBlank Start interrupt
-	*P_PPU_CONTROL |= PPUEN;
+    // Enable PPU and VBlank Start interrupt
     *P_IRQ_CONTROL |= BLK_ST_EN;
-
+    *P_PPU_CONTROL |= PPUEN;
 }
 
 // =============================================================

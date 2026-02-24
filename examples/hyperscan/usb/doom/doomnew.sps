@@ -31,11 +31,11 @@ OBJDUMP FLag =
 IMG2BIN = ..\S_CORE~1.1\GNU\bin\img2bin
 IMG2BIN FLag = 
 Lik Lib = 
-Stack base address = a0fffff0
+Stack base address = a0f68000
 Pre-Link Description = 
 Pre-Link Command = 
 Post-Build Description = 
-Post-Build Command = 	cd ./Debug && move doomnew.elf.bin hyper.Exe	cd ./Debug && move hyper.exe  D:/apps/doom/hyper.exe
+Post-Build Command = 	cd ./Debug && move doomnew.elf.bin hyper.Exe	cd ./Debug && move hyper.exe  D:\apps\doom\hyper.exe
 Custom Build Enable = 0
 WorkDir = 
 Custom Build = 
@@ -255,6 +255,16 @@ PARAM=
 
 # Begin Source File
 SOURCE=..\..\..\..\src\uart\uart.c
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# End Group
+# Begin Group "cpu"
+#PROP Default_Filter = *.c
+
+# Begin Source File
+SOURCE=..\..\..\..\src\cpu\cache.c
 USEPARAM=FALSE
 PARAM=
 # End Source File
@@ -812,7 +822,7 @@ PARAM=
 #PROP Default_Filter = 
 
 # Begin Source File
-SOURCE=..\..\..\..\include\irq\intenable.h
+SOURCE=..\..\..\..\include\irq\interrupts.h
 USEPARAM=FALSE
 PARAM=
 # End Source File

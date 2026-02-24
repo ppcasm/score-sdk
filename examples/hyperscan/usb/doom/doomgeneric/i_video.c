@@ -27,372 +27,177 @@ rcsid[] = "$Id: i_x.c,v 1.6 1997/02/03 22:45:10 b1 Exp $";
 
 #include "config.h"
 #include "v_video.h"
-#include "m_argv.h"
 #include "d_event.h"
-#include "d_main.h"
 #include "i_video.h"
 #include "z_zone.h"
-
-#include "tables.h"
-#include "doomkeys.h"
-
+#include "tables.h"     // gammatable
 #include "doomgeneric.h"
-
+#include <stdint.h>
+#include <string.h>
 #include <stdbool.h>
-#include <stdlib.h>
+#define SRC_W   320
+#define SRC_H   200
+#define DST_W   320
+#define DST_H   240
 
-#include <fcntl.h>
+// HyperScan RGB565 framebuffer
+#define FBADDR  0xA0F69000u
 
-#include <stdarg.h>
-
-#include <sys/types.h>
-
-#include "tv/tv.h"
-
-static uint16_t palette565[256];
-
-//#define CMAP256
-
-struct FB_BitField
-{
-	uint32_t offset;			/* beginning of bitfield	*/
-	uint32_t length;			/* length of bitfield		*/
-};
-
-struct FB_ScreenInfo
-{
-	uint32_t xres;			/* visible resolution		*/
-	uint32_t yres;
-	uint32_t xres_virtual;		/* virtual resolution		*/
-	uint32_t yres_virtual;
-
-	uint32_t bits_per_pixel;		/* guess what			*/
-	
-							/* >1 = FOURCC			*/
-	struct FB_BitField red;		/* bitfield in s_Fb mem if true color, */
-	struct FB_BitField green;	/* else only length is significant */
-	struct FB_BitField blue;
-	struct FB_BitField transp;	/* transparency			*/
-};
-
-static struct FB_ScreenInfo s_Fb;
-int fb_scaling = 0;
-int usemouse = 0;
-
-
-#ifdef CMAP256
-
-boolean palette_changed;
-struct color colors[256];
-
-#else  // CMAP256
-
-static struct color colors[256];
-
-#endif  // CMAP256
-
-
-void I_GetEvent(void);
-
-// The screen buffer; this is modified to draw things to the screen
-
+// Doom's 8-bit screen buffer (paletted)
 byte *I_VideoBuffer = NULL;
 
-// If true, game is running as a screensaver
-
 boolean screensaver_mode = false;
-
-// Flag indicating whether the screen is currently visible:
-// when the screen isnt visible, don't render the screen
-
-boolean screenvisible;
-
-// Mouse acceleration
-//
-// This emulates some of the behavior of DOS mouse drivers by increasing
-// the speed when the mouse is moved fast.
-//
-// The mouse input values are input directly to the game, but when
-// the values exceed the value of mouse_threshold, they are multiplied
-// by mouse_acceleration to increase the speed.
-
-float mouse_acceleration = 2.0;
+boolean screenvisible = true;
+float mouse_acceleration = 2.0f;
 int mouse_threshold = 10;
-
-// Gamma correction level to use
-
+int usemouse = 0;
 int usegamma = 0;
 
-typedef struct
+// 256-entry palette mapped to RGB565 (pre-gamma-corrected)
+static uint16_t palette565[256];
+
+// dst_y -> src_y (nearest-neighbor vertical scale)
+static uint16_t ymap[DST_H];
+static bool ymap_init = false;
+static void init_ymap(void)
 {
-	byte r;
-	byte g;
-	byte b;
-} col_t;
-
-// Palette converted to RGB565
-
-static uint16_t rgb565_palette[256];
-
-void cmap_to_rgb565(uint16_t * out, uint8_t * in, int in_pixels)
-{
-    int i, j;
-    struct color c;
-    uint16_t r, g, b;
-
-    for (i = 0; i < in_pixels; i++)
-    {
-        c = colors[*in]; 
-        r = ((uint16_t)(c.r >> 3)) << 11;
-        g = ((uint16_t)(c.g >> 2)) << 5;
-        b = ((uint16_t)(c.b >> 3)) << 0;
-        *out = (r | g | b);
-
-        in++;
-        for (j = 0; j < fb_scaling; j++) {
-            out++;
-        }
+	int y = 0;
+    for (y = 0; y < DST_H; y++) {
+        uint32_t sy = (uint32_t)y * (uint32_t)SRC_H / (uint32_t)DST_H;
+        if (sy >= SRC_H) sy = SRC_H - 1;
+        ymap[y] = (uint16_t)sy;
     }
+    ymap_init = true;
 }
 
-void cmap_to_rgb565bkp(uint16_t *out, const uint8_t *in, int count)
+static inline void row_cmap8_to_565(uint16_t *dst, const uint8_t *src)
 {
-    const uint8_t *end = in + count;
-    int fs = fb_scaling;
-
-    // Common case: no horizontal scaling
-    if (fs == 1)
-    {
-        while (in < end)
-        {
-            *out++ = palette565[*in++];
-        }
-    }
-    else
-    {
-        // General case: replicate each pixel `fs` times
-        while (in < end)
-        {
-            uint16_t pix = palette565[*in++];
-            int j;
-            for (j = 0; j < fs; j++)
-                *out++ = pix;
-        }
-    }
-}
-
-void I_InitGraphics (void)
-{
-    int i;
-
-	memset(&s_Fb, 0, sizeof(struct FB_ScreenInfo));
-	int xres = DOOMGENERIC_RESX;
-	int yres = DOOMGENERIC_RESY;
-
-    printf("I_InitGraphics: DOOM screen size: w x h: %d x %d\n", SCREENWIDTH, SCREENHEIGHT);
-	printf("I_InitGraphics: DOOM GENSIZE: w x h: %d x %d\n", DOOMGENERIC_RESX, DOOMGENERIC_RESY);
+	int x = 0;
 	
-    i = M_CheckParmWithArgs("-scaling", 1);
-    if (i > 0) {
-        i = atoi(myargv[i + 1]);
-        fb_scaling = i;
-        printf("I_InitGraphics: Scaling factor: %d\n", fb_scaling);
-    } else {
-        fb_scaling = xres / SCREENWIDTH;
-        if (yres / SCREENHEIGHT < fb_scaling)
-            fb_scaling = yres / SCREENHEIGHT;
-        printf("I_InitGraphics: Auto-scaling factor: %d\n", fb_scaling);
+    // SRC_W is 320, divisible by 8
+    for (x = 0; x < SRC_W; x += 8) {
+        dst[x+0] = palette565[src[x+0]];
+        dst[x+1] = palette565[src[x+1]];
+        dst[x+2] = palette565[src[x+2]];
+        dst[x+3] = palette565[src[x+3]];
+        dst[x+4] = palette565[src[x+4]];
+        dst[x+5] = palette565[src[x+5]];
+        dst[x+6] = palette565[src[x+6]];
+        dst[x+7] = palette565[src[x+7]];
     }
-
-    /* Allocate screen to draw to */
-	I_VideoBuffer = (byte*)Z_Malloc (SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);  // For DOOM to draw on
-
-	screenvisible = true;
-
-    extern void I_InitInput(void);
-    I_InitInput();
 }
-
-void I_ShutdownGraphics (void)
-{
-	Z_Free (I_VideoBuffer);
-}
-
-void I_StartFrame (void)
-{
-
-}
-
-void I_StartTic (void)
-{
-	I_GetEvent();
-}
-
-void I_UpdateNoBlit (void)
-{
-}
-
-//
-// I_FinishUpdate
-//
-
-void I_FinishUpdate (void)
-{
-    unsigned char *line_in, *line_out;
-
-    /* DRAW SCREEN */
-    line_in  = (unsigned char *) I_VideoBuffer;
-    line_out = (unsigned char *) DG_ScreenBuffer;
-
-    cmap_to_rgb565((void*)line_out, (void*)line_in, SCREENWIDTH*SCREENHEIGHT);
-
-	DG_DrawFrame();
-	//TV_Buffer_Set((unsigned int)line_out, (unsigned int)line_out, (unsigned int)line_out);
-}
-
-//
-// I_ReadScreen
-//
-void I_ReadScreen (byte* scr)
-{
-    memcpy (scr, I_VideoBuffer, SCREENWIDTH * SCREENHEIGHT);
-}
-
-//
-// I_SetPalette
-//
-#define GFX_RGB565(r, g, b)			((((r & 0xF8) >> 3) << 11) | (((g & 0xFC) >> 2) << 5) | ((b & 0xF8) >> 3))
-#define GFX_RGB565_R(color)			((0xF800 & color) >> 11)
-#define GFX_RGB565_G(color)			((0x07E0 & color) >> 5)
-#define GFX_RGB565_B(color)			(0x001F & color)
 
 static void BuildRGB565Palette(const uint8_t *pal)
 {
-    int i;
-    for (i = 0; i < 256; i++)
-    {
-        // pull 8-bit R,G,B and gamma-correct
-        uint8_t r8 = gammatable[usegamma][ *pal++ ];
-        uint8_t g8 = gammatable[usegamma][ *pal++ ];
-        uint8_t b8 = gammatable[usegamma][ *pal++ ];
-
-        // down-shift to 5/6/5 bits
-        uint16_t r5 = (r8 >> 3);
-        uint16_t g6 = (g8 >> 2);
-        uint16_t b5 = (b8 >> 3);
-
-        // pack into RGB565
+	int i = 0;
+    for (i = 0; i < 256; i++) {
+        // palette is 256*3 bytes (r,g,b). Apply gamma via gammatable.
+        uint8_t r8 = gammatable[usegamma][*pal++];
+        uint8_t g8 = gammatable[usegamma][*pal++];
+        uint8_t b8 = gammatable[usegamma][*pal++];
+        uint16_t r5 = (uint16_t)(r8 >> 3);
+        uint16_t g6 = (uint16_t)(g8 >> 2);
+        uint16_t b5 = (uint16_t)(b8 >> 3);
         palette565[i] = (uint16_t)((r5 << 11) | (g6 << 5) | b5);
     }
 }
 
-void I_SetPalette (byte* palette)
+void I_GetEvent(void);
+
+void I_InitGraphics(void)
 {
-	int i;
-	//col_t* c;
-
-	//for (i = 0; i < 256; i++)
-	//{
-	//	c = (col_t*)palette;
-
-	//	rgb565_palette[i] = GFX_RGB565(gammatable[usegamma][c->r],
-	//								   gammatable[usegamma][c->g],
-	//								   gammatable[usegamma][c->b]);
-
-	//	palette += 3;
-	//}
-    
-
-    /* performance boost:
-     * map to the right pixel format over here! */
-
-    for (i=0; i<256; ++i ) {
-        colors[i].a = 0;
-        colors[i].r = gammatable[usegamma][*palette++];
-        colors[i].g = gammatable[usegamma][*palette++];
-        colors[i].b = gammatable[usegamma][*palette++];
+    // Doom renders 8-bit indices into I_VideoBuffer
+    I_VideoBuffer = (byte *)Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
+    screenvisible = true;
+    if (!ymap_init) {
+        init_ymap();
     }
-    //BuildRGB565Palette(palette);
-
-#ifdef CMAP256
-
-    palette_changed = true;
-
-#endif  // CMAP256
+    extern void I_InitInput(void);
+    I_InitInput();
 }
 
-// Given an RGB value, find the closest matching palette index.
-
-int I_GetPaletteIndex (int r, int g, int b)
+void I_ShutdownGraphics(void)
 {
-    int best, best_diff, diff;
-    int i;
-    col_t color;
+    if (I_VideoBuffer) {
+        Z_Free(I_VideoBuffer);
+        I_VideoBuffer = NULL;
+    }
+}
 
-    printf("I_GetPaletteIndex\n");
+void I_StartFrame(void)
+{
+}
 
-    best = 0;
-    best_diff = INT_MAX;
+void I_StartTic(void)
+{
+    I_GetEvent();
+}
 
-    for (i = 0; i < 256; ++i)
-    {
-    	color.r = GFX_RGB565_R(rgb565_palette[i]);
-    	color.g = GFX_RGB565_G(rgb565_palette[i]);
-    	color.b = GFX_RGB565_B(rgb565_palette[i]);
+void I_UpdateNoBlit(void)
+{
+}
 
-        diff = (r - color.r) * (r - color.r)
-             + (g - color.g) * (g - color.g)
-             + (b - color.b) * (b - color.b);
+void I_FinishUpdate(void)
+{
+	int y = 0;
+    if (!I_VideoBuffer) return;
+    const uint8_t *src = (const uint8_t *)I_VideoBuffer;
+    volatile uint16_t *fb = (volatile uint16_t *)(uintptr_t)FBADDR;
+    for (y = 0; y < DST_H; y++) {
+        const int sy = ymap[y];
+        const uint8_t *src_row = src + (sy * SRC_W);
+        uint16_t *dst_row = (uint16_t *)(uintptr_t)(fb + (y * DST_W));
+        row_cmap8_to_565(dst_row, src_row);
+    }
+}
 
-        if (diff < best_diff)
-        {
-            best = i;
+void I_ReadScreen(byte *scr)
+{
+    memcpy(scr, I_VideoBuffer, SCREENWIDTH * SCREENHEIGHT);
+}
+
+void I_SetPalette(byte *palette)
+{
+    BuildRGB565Palette((const uint8_t *)palette);
+}
+
+// If something calls this, keep a simple (slow) implementation.
+// Often not used in normal gameplay.
+int I_GetPaletteIndex(int r, int g, int b)
+{
+	int i = 0;
+    int best = 0;
+    int best_diff = 0x7fffffff;
+    for (i = 0; i < 256; i++) {
+        uint16_t c = palette565[i];
+        int rr = (c >> 11) & 0x1F;
+        int gg = (c >> 5)  & 0x3F;
+        int bb = (c >> 0)  & 0x1F;
+        
+        // Compare in 5/6/5 space
+        // This is only used rarely so correctness > speed here
+        int dr = (r >> 3) - rr;
+        int dg = (g >> 2) - gg;
+        int db = (b >> 3) - bb;
+        int diff = dr*dr + dg*dg + db*db;
+        if (diff < best_diff) {
             best_diff = diff;
-        }
-
-        if (diff == 0)
-        {
-            break;
+            best = i;
+            if (diff == 0) break;
         }
     }
-
     return best;
 }
 
-void I_BeginRead (void)
+void I_BeginRead(void) {}
+void I_EndRead(void) {}
+void I_SetWindowTitle(char *title)
 {
+    DG_SetWindowTitle(title);
 }
-
-void I_EndRead (void)
-{
-}
-
-void I_SetWindowTitle (char *title)
-{
-	DG_SetWindowTitle(title);
-}
-
-void I_GraphicsCheckCommandLine (void)
-{
-}
-
-void I_SetGrabMouseCallback (grabmouse_callback_t func)
-{
-}
-
-void I_EnableLoadingDisk(void)
-{
-}
-
-void I_BindVideoVariables (void)
-{
-}
-
-void I_DisplayFPSDots (boolean dots_on)
-{
-}
-
-void I_CheckIsScreensaver (void)
-{
-}
-
+void I_GraphicsCheckCommandLine(void) {}
+void I_SetGrabMouseCallback(grabmouse_callback_t func) {}
+void I_EnableLoadingDisk(void) {}
+void I_BindVideoVariables(void) {}
+void I_DisplayFPSDots(boolean dots_on) {}
+void I_CheckIsScreensaver(void) {}

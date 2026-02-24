@@ -9,16 +9,16 @@ SEARCH_DIR("/home/aladdin/working/Score/install/score-linux-elf/lib");
 GROUP( -lc -lm -lgcc)
 SECTIONS
 {
-	.exception 0xA005D1FC :
+	.exception 0xA0B5D1FC :
   {
     *(.exception_vec)
   } = 0
   
   /* S+core IDE writed LD file begin */
-    .stack         0xA0FFFFF0 :{ _stack = .; *(.stack) }
+    .stack         0xA0FFFFFC :{ _stack = .; *(.stack) }
   /* S+core IDE writed LD file end */
   /* Read-only sections, merged into text segment: */
-  . = 0xA005E000;
+  . = 0xA0B5E000;
   .interp         : { *(.interp) }
   .hash           : { *(.hash) }
   .dynsym         : { *(.dynsym) }

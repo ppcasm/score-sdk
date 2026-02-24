@@ -21,7 +21,8 @@
 
 // Enables wad merging (the '-merge' command line parameter)
 
-#undef FEATURE_WAD_MERGE
+//#undef FEATURE_WAD_MERGE
+#define FEATURE_WAD_MERGE
 
 // Enables dehacked support ('-deh')
 

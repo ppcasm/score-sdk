@@ -8,7 +8,7 @@
 // Prototypes
 //===================================================
 
-extern void attach_isr(unsigned int irq, void (*handler)(void));
+void attach_isr(unsigned int irq, void (*handler)(void));
 void disable_isr(unsigned int vector);
 void enable_isr(unsigned int vector);
 

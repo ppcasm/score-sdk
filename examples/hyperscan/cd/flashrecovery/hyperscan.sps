@@ -251,6 +251,24 @@ PARAM=
 
 # End Group
 # Begin Source File
+SOURCE=..\..\..\..\src\cpu\cache.c
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# Begin Source File
+SOURCE=..\..\..\..\src\cpu\change_clk.c
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# Begin Source File
+SOURCE=..\..\..\..\src\cpu\discpu_funcs.s
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# Begin Source File
 SOURCE=..\..\..\..\src\libgloss.c
 USEPARAM=FALSE
 PARAM=

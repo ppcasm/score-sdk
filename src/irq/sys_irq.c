@@ -85,24 +85,26 @@ void attach_isr(unsigned int irq, isr_handler handler) {
 		// This might seem hacky here, but because we source from 1 (0xA0000204 is int1) it seems best to align
 		// our table by 0xA0000200 + (irq * 4) 
 		volatile unsigned int *fixed_irq_dispatch = (volatile unsigned int *)GENERAL_VEC;
-		
-		unsigned int irq_offset = irq;
-		
+
+		//printf("BEFORE: %x\n", fixed_irq_dispatch[irq]);
+
 		// Swap handler at fixed vector with the one from our (unused) current vector
-		fixed_irq_dispatch[irq_offset] = current_irq_dispatch[irq_offset];
-		
-		COMPILER_BARRIER();
-		cache_sync(&fixed_irq_dispatch[irq], 4);
+		//icache_invalidate_all();
+		//dcache_invalidate_all();
 		cache_flush_all();
-		COMPILER_BARRIER();
+		fixed_irq_dispatch[irq] = current_irq_dispatch[irq];
 		
-		for (flush_wait = 0; flush_wait < 5000; flush_wait++) {
-			__asm__ volatile("nop" ::: "memory");
+		//COMPILER_BARRIER();
+		
+		//cache_sync(&fixed_irq_dispatch[irq], 4);
+		for (flush_wait = 0; flush_wait < 10000; flush_wait++) {
+			__asm__ volatile("nop");
 		}
 		
-		COMPILER_BARRIER();
+		//printf("AFTER: %x\n", fixed_irq_dispatch[irq]);
+		//COMPILER_BARRIER();
 		
-		//printf("Installing handler for IRQ%d @ 0x%08x\n", irq, (unsigned int)&fixed_irq_dispatch[irq_offset]);
+		printf("Installing handler for IRQ%d @ 0x%08x\n", irq, (unsigned int)&fixed_irq_dispatch[irq]);
 		
 		// Enable interrupts
 		asm("li r4, 0x1");
@@ -221,7 +223,37 @@ void disable_isr(unsigned int vector)
 	asm("nop");
 }
 
+static inline unsigned int read_cp0_dreg(void)
+{
+    unsigned int v;
+    __asm__ volatile (
+        "mfcr %0, cr29"
+        : "=r"(v)
+    );
+    return v;
+}
 
+static inline void write_cp0_dreg(unsigned int v)
+{
+    __asm__ volatile (
+        "mtcr %0, cr29"
+        :
+        : "r"(v)
+    );
+}
 
+void int_handler(void) {
+	printf("An interrupt has occured\n");
+	while(1);
+}
 
+void general_handler(unsigned int EPC) {
+	printf("An exception has occured @ %x\n", EPC);
+	while(1);
+}
+
+void debug_handler(void) {
+	printf("A debug event has occured\n");
+	while(1);
+}
 

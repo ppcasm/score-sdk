@@ -13,7 +13,7 @@ Inc Path = ..\..\..\..\include
 Lib Path = 
 Compiler = ..\S_CORE~1.1\GNU\bin\gcc
 Compiler DefFlag = -mscore7 -mel -g -Wall -nostartfiles
-Compiler AddFlag = -Dhyperscan
+Compiler AddFlag = -Dhyperscan -Dmax_heap_size=(128*1024)
 Assembler = ..\S_CORE~1.1\GNU\bin\as
 Assembler DefFlag = -Wa,-gdwarf-2  -x assembler-with-cpp
 Assembler AddFlag = 
@@ -245,6 +245,16 @@ PARAM=
 
 # Begin Source File
 SOURCE=..\..\..\..\src\uart\uart.c
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# End Group
+# Begin Group "cpu"
+#PROP Default_Filter = *.c
+
+# Begin Source File
+SOURCE=..\..\..\..\src\cpu\cache.c
 USEPARAM=FALSE
 PARAM=
 # End Source File

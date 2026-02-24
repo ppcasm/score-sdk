@@ -250,6 +250,16 @@ PARAM=
 # End Source File
 
 # End Group
+# Begin Group "cpu"
+#PROP Default_Filter = *.c
+
+# Begin Source File
+SOURCE=..\..\..\..\src\cpu\cache.c
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# End Group
 # Begin Source File
 SOURCE=..\..\..\..\src\libgloss.c
 USEPARAM=FALSE

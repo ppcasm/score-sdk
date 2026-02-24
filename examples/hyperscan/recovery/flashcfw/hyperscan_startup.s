@@ -71,6 +71,15 @@
 .ent _hardware_init
 _hardware_init:
 		
+        //Disable interrupts 
+        li r4, 0x0
+        mtcr r4, cr0 
+        nop
+        nop
+        nop
+        nop
+        nop
+       
 		// Set up gp
 		la      r28, _gp
 		

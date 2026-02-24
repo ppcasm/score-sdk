@@ -37,9 +37,6 @@ def main():
 
         if(SHOW_PRINTF):
             while(1):
-                ser.flush()
-                ser.read(1)
-                ser.flush()
                 print(ser.readline().strip().decode("utf-8"))
 
         

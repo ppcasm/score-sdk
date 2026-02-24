@@ -7,7 +7,7 @@
 #include "cpu/cache.h"
 
 #ifndef SCORE_CACHE_LINE_SIZE
-#define SCORE_CACHE_LINE_SIZE 16u
+#define SCORE_CACHE_LINE_SIZE 128u
 #endif
 
 // Fill bubble pipeline

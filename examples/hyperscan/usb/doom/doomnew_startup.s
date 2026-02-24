@@ -4,7 +4,7 @@
 .global _hardware_init
 .ent _hardware_init
 _hardware_init:
-
+		
 		// Setup SDRAM
 		la	r9, 0x88070060
 		la r10, 0x95404b04

@@ -36,6 +36,11 @@
 
 #include "w_wad.h"
 
+extern wad_file_t *W_AddFile (char *filename);
+
+extern lumpinfo_t *lumpinfo;
+extern unsigned int numlumps;
+
 typedef struct
 {
     // Should be "IWAD" or "PWAD".
@@ -608,5 +613,202 @@ void W_CheckCorrectIWAD(GameMission_t mission)
             }
         }
     }
+}
+
+/* Compare an 8-char lump name with a C string (case-insensitive) */
+static int lumpname_eq(const char lumpname[8], const char *s)
+{
+    int i = 0;
+    for (i = 0; i < 8; i++)
+    {
+        char a = lumpname[i];
+        char b = (i < (int)strlen(s)) ? s[i] : '\0';
+
+        if (b == '\0')
+        {
+            // s ended early, remaining lump chars must be NUL or spaces
+            for (; i < 8; i++)
+            {
+                char c = lumpname[i];
+                if (c != '\0' && c != ' ')
+                    return 0;
+            }
+            return 1;
+        }
+
+        if (tolower((unsigned char)a) != tolower((unsigned char)b))
+            return 0;
+    }
+    // If s is longer than 8, not equal.
+    return s[8] == '\0';
+}
+
+/* Find the first occurrence of a lump name in [start, end). Returns -1 if not found. */
+static int find_lump_range(const char *name, int start, int end)
+{
+	int i = 0;
+    for (i = start; i < end; i++)
+    {
+        if (lumpname_eq(lumpinfo[i].name, name))
+            return i;
+    }
+    return -1;
+}
+
+/* Find the last occurrence of a lump name in [start, end). Returns -1 if not found. */
+static int find_lump_last_range(const char *name, int start, int end)
+{
+	int i = 0;
+    for (i = end - 1; i >= start; i--)
+    {
+        if (lumpname_eq(lumpinfo[i].name, name))
+            return i;
+    }
+    return -1;
+}
+
+/* Delete one lump directory entry at index idx (shifts down) */
+static void delete_lump_at(int idx)
+{
+    if (idx < 0 || idx >= numlumps)
+        return;
+
+    memmove(&lumpinfo[idx], &lumpinfo[idx + 1],
+            (size_t)(numlumps - (idx + 1)) * sizeof(lumpinfo[0]));
+    numlumps--;
+}
+
+/*
+  Move a contiguous block [src_first, src_last] (inclusive) to position dst (in current array),
+  preserving the internal order of the block.
+*/
+static void move_block_to(int src_first, int src_last, int dst)
+{
+    if (src_first < 0 || src_last < src_first || src_last >= numlumps)
+        return;
+
+    int block_len = src_last - src_first + 1;
+
+    // If destination lies inside the block, no-op.
+    if (dst >= src_first && dst <= src_last + 1)
+        return;
+
+    // Copy out block.
+    lumpinfo_t tmp[1024];
+    if (block_len > (int)(sizeof(tmp) / sizeof(tmp[0])))
+    {
+        // If you might have more than 1024 lumps in the merged block, replace with malloc.
+        // Keeping it simple here.
+        return;
+    }
+    memcpy(tmp, &lumpinfo[src_first], (size_t)block_len * sizeof(lumpinfo[0]));
+
+    if (dst < src_first)
+    {
+        // Shift [dst, src_first) right by block_len
+        memmove(&lumpinfo[dst + block_len], &lumpinfo[dst],
+                (size_t)(src_first - dst) * sizeof(lumpinfo[0]));
+        // Place block
+        memcpy(&lumpinfo[dst], tmp, (size_t)block_len * sizeof(lumpinfo[0]));
+    }
+    else
+    {
+        // dst > src_last+1: Shift (src_last+1 .. dst-1) left by block_len
+        memmove(&lumpinfo[src_first], &lumpinfo[src_last + 1],
+                (size_t)(dst - (src_last + 1)) * sizeof(lumpinfo[0]));
+        // Place block at new position (dst - block_len)
+        memcpy(&lumpinfo[dst - block_len], tmp, (size_t)block_len * sizeof(lumpinfo[0]));
+    }
+}
+
+/*
+  Merge logic:
+    - Append the PWAD via W_AddFile().
+    - Within the newly-added lump range, locate sprite and flat namespaces:
+        S_START..S_END (or SS_START..SS_END)
+        F_START..F_END (or FF_START..FF_END)
+    - Move sprite lumps (excluding the markers) to right before the *existing* S_END in the base set.
+    - Move flat lumps to right before the existing F_END.
+    - Remove the PWAD marker lumps.
+*/
+void W_MergeFile(const char *filename)
+{
+    int old_numlumps = numlumps;
+
+    W_AddFile(filename);
+
+    int new_first = old_numlumps;
+    int new_last_excl = numlumps;
+
+    // Find base insertion points (prefer last S_END/F_END before the new lumps were appended)
+    int base_s_end = find_lump_last_range("S_END", 0, old_numlumps);
+    int base_f_end = find_lump_last_range("F_END", 0, old_numlumps);
+
+    if (base_s_end < 0) base_s_end = old_numlumps; // fallback: end of base set
+    if (base_f_end < 0) base_f_end = old_numlumps;
+
+    // Find markers in the new PWAD range (support both S_/SS_ and F_/FF_)
+    struct ns_markers { int start; int end; const char *start_name; const char *end_name; };
+
+    struct ns_markers sprites = { -1, -1, "S_START", "S_END" };
+    sprites.start = find_lump_range("S_START", new_first, new_last_excl);
+    sprites.end   = find_lump_range("S_END",   new_first, new_last_excl);
+    if (sprites.start < 0 || sprites.end < 0 || sprites.end <= sprites.start)
+    {
+        sprites.start_name = "SS_START";
+        sprites.end_name   = "SS_END";
+        sprites.start = find_lump_range("SS_START", new_first, new_last_excl);
+        sprites.end   = find_lump_range("SS_END",   new_first, new_last_excl);
+    }
+
+    struct ns_markers flats = { -1, -1, "F_START", "F_END" };
+    flats.start = find_lump_range("F_START", new_first, new_last_excl);
+    flats.end   = find_lump_range("F_END",   new_first, new_last_excl);
+    if (flats.start < 0 || flats.end < 0 || flats.end <= flats.start)
+    {
+        flats.start_name = "FF_START";
+        flats.end_name   = "FF_END";
+        flats.start = find_lump_range("FF_START", new_first, new_last_excl);
+        flats.end   = find_lump_range("FF_END",   new_first, new_last_excl);
+    }
+
+    // Move sprites: [start+1, end-1] before base_s_end
+    if (sprites.start >= 0 && sprites.end > sprites.start + 1)
+    {
+        int block_first = sprites.start + 1;
+        int block_last  = sprites.end - 1;
+
+        // If base_s_end is after the block, moving will change indices, move_block_to handles it.
+        move_block_to(block_first, block_last, base_s_end);
+
+        // After moving, the marker indices likely changed. Refind markers in whole array and delete.
+        int s_start_idx = find_lump_range(sprites.start_name, 0, numlumps);
+        int s_end_idx   = find_lump_range(sprites.end_name,   0, numlumps);
+        if (s_end_idx >= 0) delete_lump_at(s_end_idx);
+        if (s_start_idx >= 0) delete_lump_at(s_start_idx);
+
+        // Update base_f_end/base_s_end if you care about exact ordering for subsequent merges.
+        // Simple approach is to recompute from scratch after deletions.
+        base_s_end = find_lump_last_range("S_END", 0, numlumps);
+        if (base_s_end < 0) base_s_end = numlumps;
+        base_f_end = find_lump_last_range("F_END", 0, numlumps);
+        if (base_f_end < 0) base_f_end = numlumps;
+    }
+
+    // Move flats: [start+1, end-1] ? before base_f_end
+    if (flats.start >= 0 && flats.end > flats.start + 1)
+    {
+        int block_first = flats.start + 1;
+        int block_last  = flats.end - 1;
+
+        move_block_to(block_first, block_last, base_f_end);
+
+        int f_start_idx = find_lump_range(flats.start_name, 0, numlumps);
+        int f_end_idx   = find_lump_range(flats.end_name,   0, numlumps);
+        if (f_end_idx >= 0) delete_lump_at(f_end_idx);
+        if (f_start_idx >= 0) delete_lump_at(f_start_idx);
+    }
+
+    printf("W_MergeFile: merged %s\n", filename);
 }
 
