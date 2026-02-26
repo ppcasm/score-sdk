@@ -26,9 +26,9 @@
 *                                                                                   *
 *                                                                                   *
 ************************************************************************************/
-#define DEBUG_VEC   0xA00001FC
-#define GENERAL_VEC 0xA0000200
-#define INT_VEC     0xA0000204
+#define DEBUG_VEC   0x800001FC
+#define GENERAL_VEC 0x80000200
+#define INT_VEC     0x80000204
 
 // Used to reference start of current exception vector
 extern void int1_vec(void);
@@ -55,18 +55,15 @@ void attach_isr(unsigned int irq, isr_handler handler) {
 
     volatile unsigned int flush_wait = 0;
     
+    unsigned int saved_mask1 = *P_INT_MASK_CTRL1;
+    unsigned int saved_mask2 = *P_INT_MASK_CTRL2;
+
+    *P_INT_MASK_CTRL1 = 0xFFFFFFFFu;
+    *P_INT_MASK_CTRL2 = 0xFFFFFFFFu;
+          
 	// Only attach handler if our irq is within the appropriate IRQ firing range
     if (irq >= MIN_IRQ && irq <= MAX_IRQ) {
     	
-    	// Disable interrupts
-		asm("li r4, 0x0");
-		asm("mtcr r4, cr0");
-		asm("nop");
-		asm("nop");
-		asm("nop");
-		asm("nop");
-		asm("nop");
-		
 		// Install handler to isr_table
     	isr_table[irq] = handler;
     
@@ -86,34 +83,21 @@ void attach_isr(unsigned int irq, isr_handler handler) {
 		// our table by 0xA0000200 + (irq * 4) 
 		volatile unsigned int *fixed_irq_dispatch = (volatile unsigned int *)GENERAL_VEC;
 
-		//printf("BEFORE: %x\n", fixed_irq_dispatch[irq]);
-
 		// Swap handler at fixed vector with the one from our (unused) current vector
-		//icache_invalidate_all();
-		//dcache_invalidate_all();
+
 		cache_flush_all();
 		fixed_irq_dispatch[irq] = current_irq_dispatch[irq];
-		
-		//COMPILER_BARRIER();
 		
 		//cache_sync(&fixed_irq_dispatch[irq], 4);
 		for (flush_wait = 0; flush_wait < 10000; flush_wait++) {
 			__asm__ volatile("nop");
 		}
-		
-		//printf("AFTER: %x\n", fixed_irq_dispatch[irq]);
-		//COMPILER_BARRIER();
-		
+	
+	    *P_INT_MASK_CTRL1 = saved_mask1;
+	    *P_INT_MASK_CTRL2 = saved_mask2;
+	    	
 		printf("Installing handler for IRQ%d @ 0x%08x\n", irq, (unsigned int)&fixed_irq_dispatch[irq]);
 		
-		// Enable interrupts
-		asm("li r4, 0x1");
-		asm("mtcr r4, cr0");
-		asm("nop");
-		asm("nop");
-		asm("nop");
-		asm("nop");
-		asm("nop");
     }
 }
 
@@ -164,82 +148,48 @@ static inline unsigned int vector_to_source(unsigned int vector)
 }
 
 void enable_isr(unsigned int vector)
-{
-	// Disable interrupts
-	asm("li r4, 0x0");
-	asm("mtcr r4, cr0");
-	asm("nop");
-	asm("nop");
-	asm("nop");
-	asm("nop");
-    asm("nop");
-		    
+{		    
     unsigned int intr_src = vector_to_source(vector);
-
+    unsigned int saved_mask1 = *P_INT_MASK_CTRL1;
+    unsigned int saved_mask2 = *P_INT_MASK_CTRL2;
+    
+    *P_INT_MASK_CTRL1 = 0xFFFFFFFFu;
+    *P_INT_MASK_CTRL2 = 0xFFFFFFFFu;
+    
     // Unmask/Enable
     if (intr_src < 32) {
-        *P_INT_MASK_CTRL1 &= ~(1u << intr_src);
+        //*P_INT_MASK_CTRL1 &= ~(1u << intr_src);
+        saved_mask1 &= ~(1u << intr_src);
     } else {
-        *P_INT_MASK_CTRL2 &= ~(1u << (intr_src - 32u));
+        //*P_INT_MASK_CTRL2 &= ~(1u << (intr_src - 32u));
+        saved_mask2 &= ~(1u << (intr_src - 32u));
     }
     
-    // Enable interrupts
-	asm("li r4, 0x1");
-	asm("mtcr r4, cr0");
-	asm("nop");
-	asm("nop");
-	asm("nop");
-	asm("nop");
-	asm("nop");
+    *P_INT_MASK_CTRL1 = saved_mask1;
+    *P_INT_MASK_CTRL2 = saved_mask2;
 }
 
 void disable_isr(unsigned int vector)
 {
-	// Disable interrupts
-	asm("li r4, 0x0");
-	asm("mtcr r4, cr0");
-	asm("nop");
-	asm("nop");
-	asm("nop");
-	asm("nop");
-    asm("nop");
-		    
     unsigned int intr_src = vector_to_source(vector);
 
+    unsigned int saved_mask1 = *P_INT_MASK_CTRL1;
+    unsigned int saved_mask2 = *P_INT_MASK_CTRL2;
+    
+    *P_INT_MASK_CTRL1 = 0xFFFFFFFFu;
+    *P_INT_MASK_CTRL2 = 0xFFFFFFFFu;
+    
     // Mask/Disable
     if (intr_src < 32) {
-        *P_INT_MASK_CTRL1 |= (1u << intr_src);
+        //*P_INT_MASK_CTRL1 |= (1u << intr_src);
+        saved_mask1 |= (1u << intr_src);
     } else {
-        *P_INT_MASK_CTRL2 |= (1u << (intr_src - 32u));
+        //*P_INT_MASK_CTRL2 |= (1u << (intr_src - 32u));
+        saved_mask2 |= (1u << (intr_src - 32u));
     }
     
-    // Enable interrupts
-	asm("li r4, 0x1");
-	asm("mtcr r4, cr0");
-	asm("nop");
-	asm("nop");
-	asm("nop");
-	asm("nop");
-	asm("nop");
-}
-
-static inline unsigned int read_cp0_dreg(void)
-{
-    unsigned int v;
-    __asm__ volatile (
-        "mfcr %0, cr29"
-        : "=r"(v)
-    );
-    return v;
-}
-
-static inline void write_cp0_dreg(unsigned int v)
-{
-    __asm__ volatile (
-        "mtcr %0, cr29"
-        :
-        : "r"(v)
-    );
+    *P_INT_MASK_CTRL1 = saved_mask1;
+    *P_INT_MASK_CTRL2 = saved_mask2;
 }
 
 void int_handler(void) {

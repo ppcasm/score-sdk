@@ -12,7 +12,7 @@ OutPut Dir = Debug
 Inc Path = ..\..\..\..\include,.\doomgeneric
 Lib Path = 
 Compiler = ..\S_CORE~1.1\GNU\bin\gcc
-Compiler DefFlag = -mscore7 -mel -g -Wall -Os
+Compiler DefFlag = -mscore7 -mel -g -Wall -nostartfiles -Os
 Compiler AddFlag = -Dhyperscan -Dmax_heap_size=8*(1024*1024)
 Assembler = ..\S_CORE~1.1\GNU\bin\as
 Assembler DefFlag = -Wa,-gdwarf-2  -x assembler-with-cpp

@@ -731,7 +731,7 @@ static void move_block_to(int src_first, int src_last, int dst)
     - Move flat lumps to right before the existing F_END.
     - Remove the PWAD marker lumps.
 */
-void W_MergeFile(const char *filename)
+void W_MergeFile(char *filename)
 {
     int old_numlumps = numlumps;
 

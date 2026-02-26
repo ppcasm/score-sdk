@@ -64,7 +64,7 @@ static inline int joy_right(uint8_t x) { return x <= 0x60; }
 static inline int joy_up(uint8_t y)    { return y >= 0xB0; }
 static inline int joy_down(uint8_t y)  { return y <= 0x60; }
 
-static void handleKeyInput_from_hyperscan(void)
+void handle_hyperscan_input(void)
 {
     // --- current state ---
     int start  = controller[hs_controller_1].input.start;
@@ -128,28 +128,74 @@ static void handleKeyInput_from_hyperscan(void)
     #undef EMIT
 }
 
+volatile uint32_t ms_ticks = 0;
+
+void inc_ms_tick(void)
+{
+    if ((*P_TIMER5_MODE_CTRL >> 26) & 1) 
+    {
+        *P_TIMER5_MODE_CTRL = 0x8C000000u;
+        ms_ticks++;
+    }
+}
+
 void DG_Init()
 {
+	int i = 0;
+	
+	/* Set up HyperScan controllers */
 	hs_controller_init();
 
+    /* Set up SPG29x Timer */
+    
+    // Register ISR callback for Timer
+    attach_isr(INT_TIMER, inc_ms_tick);
+    
+    // Mask Timer interrupt
+    disable_isr(INT_TIMER);
+    
+    // Enable Timer module, we will use timer5
+    *P_TIMER5_CLK_CONF = C_TIMER_CLK_EN | C_TIMER_RST_DIS;
+    
+    // We will set Timer5 clk to use 27Mhz clk with a divisor (div + 1) to get a clean 1Mhz tick
+    *P_TIMER_CLK_SEL = C_TIMER5_CLK_27M | 26;
+    
+    // Set up normal mode
+    *P_TIMER5_CCP_CTRL = C_TIMER_NOR_MODE;
+    
+    // We preload with 0xFC18 so that when it ticks at 1Mhz we end up 
+    *P_TIMER5_PRELOAD_DATA = 0xFC18;
+    
+    // Enable Timer
+    *P_TIMER5_MODE_CTRL = C_TIMER_CTRL_EN | C_TIMER_INT_EN | C_TIMER_INT_FLAG;
+
+    // Unmask Timer interrupt
+    enable_isr(INT_TIMER);    
+        
+    // Set up TV interface and framebuffer
     tv_init(RESOLUTION_320_240,
             COLOR_RGB565,
             (uint32_t)FBADDR,
             (uint32_t)FBADDR,
             (uint32_t)FBADDR);
             
-	ticks = 0;
+	ms_ticks = 0;
+	
+	volatile unsigned short *FB = (volatile unsigned short *)FBADDR;
+	for(i=0;i<320*240;i++) {
+		FB[i] = 0x001F;
+	}
+	
+	tv_print((unsigned short *)FBADDR, 15, 1, "LOADING...");
 }
 
 void DG_SleepMs(uint32_t ms)
 {
 }
 
-volatile uint32_t ticks = 0;
-
 uint32_t DG_GetTicksMs()
 {
-    return ticks+=8; //get_uptime_ms();
+    return ms_ticks;
 }
 
 int DG_GetKey(int* pressed, unsigned char* doomKey)
@@ -179,31 +225,29 @@ void DG_SetWindowTitle(const char * title)
 
 int main(int argc, char **argv) 
 {	
-    //*(volatile unsigned int *)0xA00416D0 = (volatile unsigned int *)inc_ticks;
-
 	FATFS fs0;
 	f_mount(&fs0, "0:", 1);
     
-	char *fake_argv[] = {"HYPER.EXE", "-merge", "batman.wad", "-iwad", "doom2.wad", "-nomouse", "-nosound", "-scaling", "0", NULL};
-	//char *fake_argv[] = {
-    //    "HYPER.EXE",
-    //    //"-iwad", "doom2.wad",
-    //    "-merge", "batman.wad",
-    //    "doom2.wad",
-        //"-file", "batman.wad",
-    //    "-nomouse",
-    //    "-nosound",
-    //    "-scaling", "0",
-    //    NULL
-    //};
+	//char *fake_argv[] = {"HYPER.EXE", "-merge", "batman.wad", "-iwad", "doom2.wad", "-nomouse", "-nosound", "-scaling", "0", NULL};
+	char *fake_argv[] = {
+        "HYPER.EXE",
+        "-iwad", "doom1.wad",
+        //"-iwad", "doom2.wad",
+        //"-merge", "batman.wad",
+        //"-file", "MARIO_V.WAD",
+        "-nomouse",
+        "-nosound",
+        "-scaling", "0",
+        NULL
+    };
     
 	int fake_argc = sizeof(fake_argv) / sizeof(fake_argv[0]) - 1;
 	
 	doomgeneric_Create(fake_argc, fake_argv);
 	
 	while(1) {
-	    hs_controller_read();
-	    handleKeyInput_from_hyperscan();
+		hs_controller_read();
+        handle_hyperscan_input();
         doomgeneric_Tick();
     }
     

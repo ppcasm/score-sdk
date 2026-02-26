@@ -25,6 +25,7 @@
 static const char
 rcsid[] = "$Id: i_x.c,v 1.6 1997/02/03 22:45:10 b1 Exp $";
 
+#include "doom.h"
 #include "config.h"
 #include "v_video.h"
 #include "d_event.h"
@@ -35,6 +36,8 @@ rcsid[] = "$Id: i_x.c,v 1.6 1997/02/03 22:45:10 b1 Exp $";
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
+#include "hyperscan/hs_controller/hs_controller.h"
+
 #define SRC_W   320
 #define SRC_H   200
 #define DST_W   320

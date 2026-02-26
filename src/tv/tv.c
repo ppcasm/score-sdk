@@ -7,17 +7,33 @@
 // =============================================================
 //	void tv_clearscreen(unsigned short *fb)
 //
-//	This clears the TV screen. This needs to be fixed at some point
-//	so as not to assume 640x480 resolution
+//	This clears the TV screen.
 // 
 // 
 //	void return
 // =============================================================
 void tv_clearscreen(unsigned short *fb){
+
 	int i = 0;
-	for(i=0;i<=640*480;i++){
-		fb[i] = 0x0000;
-	}
+	
+	// Get current resolution
+	uint32_t resolution = *P_TV_MODE_CTRL;
+
+    if (resolution & C_TV_VGA_MODE) {
+        // 640x480
+        for(i=0;i<640*480;i++) {
+        	fb[i] = 0x0000;
+        }
+    }
+    else if (resolution & C_TV_QVGA_MODE) {
+        // 320x240
+        for(i=0;i<320*240;i++) {
+        	fb[i] = 0x0000;
+        }
+    }
+    else {
+        // Unsupported
+    }
 }
 
 // =============================================================
@@ -31,14 +47,8 @@ void tv_clearscreen(unsigned short *fb){
 //
 //	void return
 // =============================================================
-#define PPU_QVGA		0x00000000
-#define PPU_VGA			0x00000001
-#define PPU_HVGA		0x00000002
-#define PPU_VGA2CIF		0x00000003
-#define PPUEN			0x00001000
-#define BLK_ST_EN       (1u << 0)
 
-void tv_init(unsigned int Resolution, unsigned int ColorMode, unsigned int fb1_addr, unsigned int fb2_addr, unsigned int fb3_addr){
+void tv_init(unsigned int resolution, unsigned int colormode, unsigned int fb1_addr, unsigned int fb2_addr, unsigned int fb3_addr){
 	
 	*P_TV_CLK_CONF = C_TV_CLK_EN | C_TV_RST_DIS;
 	
@@ -50,26 +60,39 @@ void tv_init(unsigned int Resolution, unsigned int ColorMode, unsigned int fb1_a
 					| C_TV_NTSC_TYPE 		
 					| C_TV_LITTLE_ENDIAN; 	
 
-	if(Resolution == RESOLUTION_640_480){
-		*P_TV_MODE_CTRL |= C_TV_VGA_MODE;
-	}
-	
-	if(Resolution == RESOLUTION_320_240){
-		*P_TV_MODE_CTRL |= C_TV_QVGA_MODE;
-	}
-	
-	if(ColorMode == COLOR_RGB565){
+    // Clear resolution bits first
+    *P_TV_MODE_CTRL &= ~(C_TV_VGA_MODE | C_TV_QVGA_MODE);
+    
+    // Set resolution 
+    if (resolution == RESOLUTION_640_480) {
+    	// 640x480
+        *P_TV_MODE_CTRL |= C_TV_VGA_MODE;
+    } else if (resolution == RESOLUTION_320_240) {
+    	// 320x240
+        *P_TV_MODE_CTRL |= C_TV_QVGA_MODE;
+    } else {
+        // Invalid resolution (default to 640x480)
+        *P_TV_MODE_CTRL |= C_TV_VGA_MODE;
+    }
+    
+    // Set color mode (TODO: Add RGBA5551 support)
+	if(colormode == COLOR_RGB565){
 		*P_TV_MODE_CTRL	|= 	C_TV_RGB_MODE 				
 							| C_TV_RGB565_MODE;
 	}
 
+    // Set up framebuffer
 	tv_buffer_set(fb1_addr, fb2_addr, fb3_addr);
+	
+	// Clear screen
 	tv_clearscreen((unsigned short *)fb1_addr);
+	
+	// Choose first framebuffer as current
 	tv_buffer_sel(0);
 	
     // Enable PPU and VBlank Start interrupt
-    *P_IRQ_CONTROL |= BLK_ST_EN;
-    *P_PPU_CONTROL |= PPUEN;
+    *P_IRQ_CONTROL |= C_TV_VBLANKINGSINT_EN;
+    *P_PPU_CONTROL |= C_TV_CTRL_EN;
 }
 
 // =============================================================
@@ -153,7 +176,7 @@ void tv_print(unsigned short *fb, unsigned int x, unsigned int y, const char *te
         {
 	      for (xx = 0; xx < 8; xx++)
 	      {
-            if(font[(*text)*16+yy] & (1<<(8-xx))) colorz = 0xFFFF; else colorz = 0x0000; //fb[(y*16+yy)*640+(x*8+xx)];
+            if(font[(*text)*16+yy] & (1<<(8-xx))) colorz = 0xFFFF; //0x0000; //fb[(y*16+yy)*640+(x*8+xx)];
 	        fb[(y*16+yy)*640+(x*8+xx)] = colorz;
 	      }
 	}
@@ -180,7 +203,7 @@ void tv_printcolor(unsigned short *fb, unsigned int x, unsigned int y, const cha
         {
 	      for (xx = 0; xx < 8; xx++)
 	      {
-            if(font[(*text)*16+yy] & (1<<(8-xx))) fb[(y*16+yy)*640+(x*8+xx)] = color; //fb[(y*16+yy)*640+(x*8+xx)];
+            if(font[(*text)*16+yy] & (1<<(8-xx))) fb[(y*16+yy)*640+(x*8+xx)] = color;
 	        
 	      }
 	}
