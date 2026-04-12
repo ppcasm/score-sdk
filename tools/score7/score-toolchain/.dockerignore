@@ -1,0 +1,9 @@
+.git
+working-dir
+build
+dist
+*.o
+*.a
+*.elf
+*.bin
+*.img

@@ -1,0 +1,24 @@
+{
+  "name": "score-toolchain",
+  "build": {
+    "dockerfile": "../Dockerfile",
+    "context": ".."
+  },
+  "workspaceFolder": "/workspace/score-sdk",
+  "workspaceMount": "source=${localWorkspaceFolder}/../../..,target=/workspace/score-sdk,type=bind",
+  "remoteEnv": {
+    "PATH": "/opt/score-toolchain/bin:${containerEnv:PATH}"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools",
+        "ms-vscode.makefile-tools"
+      ],
+      "settings": {
+        "terminal.integrated.cwd": "/workspace/score-sdk/tools/score7/score-toolchain"
+      }
+    }
+  }
+}

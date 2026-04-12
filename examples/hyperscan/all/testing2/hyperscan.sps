@@ -365,6 +365,12 @@ PARAM=
 
 # End Group
 # Begin Source File
+SOURCE=..\..\..\..\include\hyperscan\hyperscan.h
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
+# Begin Source File
 SOURCE=..\..\..\..\include\score7_constants.h
 USEPARAM=FALSE
 PARAM=

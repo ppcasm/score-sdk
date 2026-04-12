@@ -1,3 +1,5 @@
+#include <stdarg.h>
+#include <stdio.h>
 #include "score7_registers.h"
 #include "score7_constants.h"
 #include "tv/tv.h"
@@ -17,22 +19,25 @@ void tv_clearscreen(unsigned short *fb){
 	int i = 0;
 	
 	// Get current resolution
-	uint32_t resolution = *P_TV_MODE_CTRL;
+	uint32_t resolution = *P_TV_MODE_CTRL & (C_TV_VGA_MODE | C_TV_QVGA_MODE);
 
-    if (resolution & C_TV_VGA_MODE) {
+    if (resolution == C_TV_VGA_MODE) {
         // 640x480
         for(i=0;i<640*480;i++) {
         	fb[i] = 0x0000;
         }
     }
-    else if (resolution & C_TV_QVGA_MODE) {
+    else if (resolution == C_TV_QVGA_MODE) {
         // 320x240
         for(i=0;i<320*240;i++) {
         	fb[i] = 0x0000;
         }
     }
     else {
-        // Unsupported
+        // Unsupported (Default: 640x480)
+        for(i=0;i<640*480;i++) {
+        	fb[i] = 0x0000;
+        }
     }
 }
 
@@ -91,8 +96,8 @@ void tv_init(unsigned int resolution, unsigned int colormode, unsigned int fb1_a
 	tv_buffer_sel(0);
 	
     // Enable PPU and VBlank Start interrupt
-    *P_IRQ_CONTROL |= C_TV_VBLANKINGSINT_EN;
-    *P_PPU_CONTROL |= C_TV_CTRL_EN;
+    //*P_IRQ_CONTROL |= C_TV_VBLANKINGSINT_EN;
+    //*P_PPU_CONTROL |= C_TV_CTRL_EN;
 }
 
 // =============================================================
@@ -168,16 +173,32 @@ void tv_fade(unsigned int fade){
 // =============================================================
 void tv_print(unsigned short *fb, unsigned int x, unsigned int y, const char *text){
 	
+	// Get current resolution
+	uint32_t resolution = *P_TV_MODE_CTRL & (C_TV_VGA_MODE | C_TV_QVGA_MODE);
+    uint32_t hres = 0;
+    
+    if (resolution == C_TV_VGA_MODE) {
+        // 640x480
+        hres = 640;
+    }
+    else if (resolution == C_TV_QVGA_MODE) {
+        // 320x240
+        hres = 320;
+    }
+    else {
+        // Unsupported (Default: 640x480)
+        hres = 640;
+    }
+    
     short xx, yy;
-    unsigned short colorz;
+    
     while (*text) 
     {
         for (yy = 0; yy < 16; yy++) 
         {
 	      for (xx = 0; xx < 8; xx++)
 	      {
-            if(font[(*text)*16+yy] & (1<<(8-xx))) colorz = 0xFFFF; //0x0000; //fb[(y*16+yy)*640+(x*8+xx)];
-	        fb[(y*16+yy)*640+(x*8+xx)] = colorz;
+            if (font[(*text)*16 + yy] & (1 << (7 - xx))) fb[(y*16 + yy) * hres + (x*8 + xx)] = 0xFFFF; else fb[(y*16 + yy) * hres + (x*8 + xx)] = 0x0000;
 	      }
 	}
 	x++;
@@ -188,22 +209,40 @@ void tv_print(unsigned short *fb, unsigned int x, unsigned int y, const char *te
 }
 
 // =============================================================
-//	void tv_printcolor(unsigned int x, unsigned int y, unsigned char *text, unsigned short color)
+//	void tv_printcolor(unsigned int x, unsigned int y, unsigned char *text, unsigned short text_color, unsigned short bg_color)
 // 
-//	Print to TV screen via low level framebuffer access, but with color
+//	Print to TV screen via low level framebuffer access, but with text and background color support
 // 
 //	void return
 // =============================================================
-void tv_printcolor(unsigned short *fb, unsigned int x, unsigned int y, const char *text, unsigned short color){
+void tv_printcolor(unsigned short *fb, unsigned int x, unsigned int y, const char *text, unsigned short text_color, unsigned short bg_color){
 	
+	// Get current resolution
+	uint32_t resolution = *P_TV_MODE_CTRL & (C_TV_VGA_MODE | C_TV_QVGA_MODE);
+    uint32_t hres = 0;
+    
+    if (resolution == C_TV_VGA_MODE) {
+        // 640x480
+        hres = 640;
+    }
+    else if (resolution == C_TV_QVGA_MODE) {
+        // 320x240
+        hres = 320;
+    }
+    else {
+        // Unsupported (Default: 640x480)
+        hres = 640;
+    }
+    
     short xx, yy;
+
     while (*text) 
     {
         for (yy = 0; yy < 16; yy++) 
         {
 	      for (xx = 0; xx < 8; xx++)
 	      {
-            if(font[(*text)*16+yy] & (1<<(8-xx))) fb[(y*16+yy)*640+(x*8+xx)] = color;
+            if (font[(*text)*16 + yy] & (1 << (7 - xx))) fb[(y*16 + yy) * hres + (x*8 + xx)] = text_color; else fb[(y*16 + yy) * hres + (x*8 + xx)] = bg_color;
 	        
 	      }
 	}
@@ -212,6 +251,26 @@ void tv_printcolor(unsigned short *fb, unsigned int x, unsigned int y, const cha
     }
     
   return;
+}
+
+// =============================================================
+// void tv_printf(unsigned short *fb, unsigned int x, unsigned int y, uint16_t fg, uint16_t bg, const char *fmt, ...)
+// 
+// Print to TV screen but support formatting chars similar to printf
+// 
+// void return
+// =============================================================
+void tv_printf(unsigned short *fb,
+               unsigned int x, unsigned int y,
+               uint16_t fg, uint16_t bg,
+               const char *fmt, ...)
+{
+    char buf[512];
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(buf, sizeof(buf), fmt, ap);
+    va_end(ap);
+    tv_printcolor(fb, x, y, buf, fg, bg);
 }
 
 // =============================================================

@@ -305,7 +305,7 @@ int PLLCHG_delay_c	//if PLLVs' freq is changed, the delay time is necessary
 
     r6=	PLLEN_delay_c;
     r7=	PLLCHG_delay_c;
-
+    
     jumpto_extrom_change_cpuclk(r4,r5,r6,r7);
     //*(volatile unsigned int *)0x88210000 = 0;
 }

@@ -20,7 +20,8 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-
+#include <strings.h>
+extern int strcasecmp(const char *, const char *);
 #include "config.h"
 #include "deh_str.h"
 #include "doomkeys.h"

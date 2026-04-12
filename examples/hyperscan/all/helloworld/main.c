@@ -8,14 +8,39 @@ This is the basic Hello World! example. It contains the very barebones code nece
 
 */
 
+#include <stdio.h>
 #include "tv/tv.h"
 
+#include <setjmp.h>
+
+jmp_buf env;
+
+void jump(void)
+{
+    printf("Inside jump()\n");
+    longjmp(env, 42);
+}
+
 // Stupid framebuffer for now
-unsigned short *fb = (unsigned short *) 0xA0400000;
+//unsigned short *fb = (unsigned short *) 0xA0400000;
 
 int main(){
 	
-	int nExitCode = 0;
+	    int val = setjmp(env);
+
+    if (val == 0)
+    {
+        printf("First return from setjmp\n");
+        jump();
+    }
+    else
+    {
+        printf("Returned via longjmp: %d\n", val);
+    }
+
+	for(;;);
+    return 0;
+	//int nExitCode = 0;
 	/************************************************************************/
 	/*   TODO: add your code here                                           */
 	/************************************************************************/
@@ -25,14 +50,17 @@ int main(){
 	 to stupid framebuffer address, TV_Init will select the first framebuffer
 	 as default.
 	*/
-	tv_init(RESOLUTION_640_480, COLOR_RGB565, 0xA0400000, 0xA0400000, 0xA0400000);
+	//tv_init(RESOLUTION_640_480, COLOR_RGB565, 0xA0400000, 0xA0400000, 0xA0400000);
 
-	while(1){
+	//int i = 0;
+	//while(1){
 				
 		// Print text on TV
-		tv_print(fb, 28, 2, "Hello World!");
+		//tv_print(fb, 28, 2, "Hello World!");
+		//for(i=0;i<=10000;i++);
+		//printf("NEWLIB WORKING!\n");
 				
-	}
+	//}
 		
-	return nExitCode;
+	//return nExitCode;
 }

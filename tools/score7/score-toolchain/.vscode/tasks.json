@@ -1,0 +1,22 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build score",
+      "type": "shell",
+      "command": "score-elf-gcc",
+      "args": [
+        "-o",
+        "test.elf",
+        "test.c"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$gcc"
+      ]
+    }
+  ]
+}

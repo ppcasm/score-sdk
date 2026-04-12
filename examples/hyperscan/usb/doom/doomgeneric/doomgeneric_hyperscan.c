@@ -17,13 +17,7 @@
 #include "hyperscan/fatfs/ff.h"
 #include "hyperscan/hs_controller/hs_controller.h"
 
-#define SRC_W 320
-#define SRC_H 200
-
-#define DST_W 320
-#define DST_H 240
-
-#define KEYQUEUE_SIZE 32
+#define KEYQUEUE_SIZE 64
 
 static unsigned short s_KeyQueue[KEYQUEUE_SIZE];
 static unsigned int s_KeyQueueWriteIndex = 0;
@@ -130,7 +124,7 @@ void handle_hyperscan_input(void)
 
 volatile uint32_t ms_ticks = 0;
 
-void inc_ms_tick(void)
+void inc_ms_tick_usb(void)
 {
     if ((*P_TIMER5_MODE_CTRL >> 26) & 1) 
     {
@@ -141,15 +135,25 @@ void inc_ms_tick(void)
 
 void DG_Init()
 {
-	int i = 0;
+	int i, hres = 0;
+
+    volatile unsigned short *FB = (volatile unsigned short *)FBADDR;
+    char *loading = "-- Loading DOOM --";
 	
 	/* Set up HyperScan controllers */
 	hs_controller_init();
 
+    // Determine if running from CD or USB
+    if (((*P_USB_GPIO_INPUT >> 8) & 1))
+    {
+    	// Running from USB
+    	printf("RUNNING FROM USB\n");
+    }
+    
     /* Set up SPG29x Timer */
     
-    // Register ISR callback for Timer
-    attach_isr(INT_TIMER, inc_ms_tick);
+    // Register ISR callback for Timer running from USB
+    attach_isr(INT_TIMER, inc_ms_tick_usb);
     
     // Mask Timer interrupt
     disable_isr(INT_TIMER);
@@ -171,22 +175,53 @@ void DG_Init()
 
     // Unmask Timer interrupt
     enable_isr(INT_TIMER);    
-        
-    // Set up TV interface and framebuffer
-    tv_init(RESOLUTION_320_240,
+    
+    // Set up TV and framebuffer based on DOOMGENERIC_RESX and DOOMGENERIC_RESY settings
+    #if (DOOMGENERIC_RESX == 320) && (DOOMGENERIC_RESY == 240)
+        tv_init(RESOLUTION_320_240,
             COLOR_RGB565,
             (uint32_t)FBADDR,
             (uint32_t)FBADDR,
             (uint32_t)FBADDR);
             
+    #elif (DOOMGENERIC_RESX == 640) && (DOOMGENERIC_RESY == 480)
+        tv_init(RESOLUTION_640_480,
+            COLOR_RGB565,
+            (uint32_t)FBADDR,
+            (uint32_t)FBADDR,
+            (uint32_t)FBADDR);
+    #else
+        #error "Unsupported resolution, use 320x240 or 640x480."
+    #endif
+	
+	// Get current resolution
+	uint32_t resolution = *P_TV_MODE_CTRL & (C_TV_VGA_MODE | C_TV_QVGA_MODE);
+
+    if (resolution == C_TV_VGA_MODE) {
+        // 640x480
+        hres = 640;
+        for(i=0;i<640*480;i++) {
+        	FB[i] = 0x001F;
+        }
+    }
+    else if (resolution == C_TV_QVGA_MODE) {
+        // 320x240
+        hres = 320;
+        for(i=0;i<320*240;i++) {
+        	FB[i] = 0x001F;
+        }
+    }
+    else {
+        // Unsupported (Default: 640x480)
+        hres = 640;
+        for(i=0;i<640*480;i++) {
+        	FB[i] = 0x001F;
+        }
+    }
+    	
+	tv_print((unsigned short *)FBADDR, ((hres/8)-strlen(loading))/2, 2, loading);
+	
 	ms_ticks = 0;
-	
-	volatile unsigned short *FB = (volatile unsigned short *)FBADDR;
-	for(i=0;i<320*240;i++) {
-		FB[i] = 0x001F;
-	}
-	
-	tv_print((unsigned short *)FBADDR, 15, 1, "LOADING...");
 }
 
 void DG_SleepMs(uint32_t ms)
@@ -231,7 +266,7 @@ int main(int argc, char **argv)
 	//char *fake_argv[] = {"HYPER.EXE", "-merge", "batman.wad", "-iwad", "doom2.wad", "-nomouse", "-nosound", "-scaling", "0", NULL};
 	char *fake_argv[] = {
         "HYPER.EXE",
-        "-iwad", "doom1.wad",
+        //"-iwad", "doom1.wad",
         //"-iwad", "doom2.wad",
         //"-merge", "batman.wad",
         //"-file", "MARIO_V.WAD",

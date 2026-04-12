@@ -94,16 +94,16 @@ tgl_wb:
 under_wt:                                # Processor is under write-through mode 
 
 //Interrupt enable 
-       li r4, 0x1 
-       mtcr r4, cr0 
+//       li r4, 0x1 
+//       mtcr r4, cr0 
 //change exception vector base to 0xa0000000 
-       nop
-       nop
-       nop
-       nop
-       nop
-       li r4, 0xa0000000 
-       mtcr r4, cr3 
+//       nop
+//       nop
+//       nop
+//       nop
+//       nop
+//       li r4, 0xa0000000 
+//       mtcr r4, cr3 
 
 //LDM enable 
        li    r5,  0xa1000000        /*The start address of data segment will move to LDM*/ 

@@ -807,6 +807,12 @@ PARAM=
 # End Source File
 
 # End Group
+# Begin Source File
+SOURCE=..\..\..\..\include\hyperscan\hyperscan.h
+USEPARAM=FALSE
+PARAM=
+# End Source File
+
 # End Group
 # Begin Group "i2cH"
 #PROP Default_Filter = 

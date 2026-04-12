@@ -6,6 +6,28 @@
 #include <fcntl.h>
 #include "score7_registers.h"
 
+typedef enum {
+    IO_UART = 0,
+    IO_TV   = 1,
+    IO_NULL = 2,
+    IO_UART_AND_TV = 3,
+} io_backend_t;
+
+static volatile io_backend_t g_fd_backend[3] = {
+	IO_UART,
+	IO_UART,
+	IO_UART,
+};
+
+void io_set_stdx(int fd, io_backend_t b) {
+	if(fd>=0 && fd<=2) g_fd_backend[fd] = b;
+}
+
+io_backend_t io_get_backend(int fd) {
+	if(fd>=0 && fd<=2) return g_fd_backend[fd];
+	return IO_UART;
+}
+
 /*
 	_putc_r  -- put a character out of the serial port.
 */
@@ -78,10 +100,11 @@ int _close_r (struct _reent *ptr, int fd){
 	exit
 */
 void _exit (int extcode){
-	while(!extcode);
+	//while(!extcode);
 	*(volatile unsigned int *)0x88210000 = 0x40;
-	// Never reached
-	goto *0x9f000000;
+    // This should never be reached, and we do this for old compiler
+	for(;;);
+
 }
 #endif
 
@@ -106,7 +129,7 @@ char * _sbrk_r (struct _reent *ptr, int nbytes){
 
 	if( heap_end + nbytes - _heap > HEAPSIZE ){
 		/* heap overflow - announce on stderr */
-		write(2, "Heap overflow!\n", 15);
+		//write(2, "Heap overflow!\n", 15);
 		abort();
 	}
 	heap_end += nbytes;

@@ -1,0 +1,17 @@
+{
+  "version": 4,
+  "configurations": [
+    {
+      "name": "score-elf",
+      "compilerPath": "/opt/score-toolchain/bin/score-elf-g++",
+      "intelliSenseMode": "gcc-x64",
+      "cStandard": "c11",
+      "cppStandard": "c++17",
+      "includePath": [
+        "${workspaceFolder}/**",
+        "/opt/score-toolchain/lib/gcc/score-elf/14.3.0/include",
+        "/opt/score-toolchain/score-elf/include"
+      ]
+    }
+  ]
+}

@@ -40,8 +40,16 @@ rcsid[] = "$Id: i_x.c,v 1.6 1997/02/03 22:45:10 b1 Exp $";
 
 #define SRC_W   320
 #define SRC_H   200
-#define DST_W   320
-#define DST_H   240
+#define DST_W   DOOMGENERIC_RESX
+#define DST_H   DOOMGENERIC_RESY
+
+#if (DST_W == 320) && (DST_H == 240)
+  #define SCALE_X2 0
+#elif (DST_W == 640) && (DST_H == 480)
+  #define SCALE_X2 1
+#else
+  #error "Unsupported resolution, use 320x240 or 640x480."
+#endif
 
 // HyperScan RGB565 framebuffer
 #define FBADDR  0xA0F69000u
@@ -73,20 +81,21 @@ static void init_ymap(void)
     ymap_init = true;
 }
 
-static inline void row_cmap8_to_565(uint16_t *dst, const uint8_t *src)
+static inline void row_cmap8_to_565_1x(uint16_t *dst, const uint8_t *src)
 {
 	int x = 0;
-	
-    // SRC_W is 320, divisible by 8
-    for (x = 0; x < SRC_W; x += 8) {
-        dst[x+0] = palette565[src[x+0]];
-        dst[x+1] = palette565[src[x+1]];
-        dst[x+2] = palette565[src[x+2]];
-        dst[x+3] = palette565[src[x+3]];
-        dst[x+4] = palette565[src[x+4]];
-        dst[x+5] = palette565[src[x+5]];
-        dst[x+6] = palette565[src[x+6]];
-        dst[x+7] = palette565[src[x+7]];
+    for (x = 0; x < SRC_W; x++) {
+        dst[x] = palette565[src[x]];
+    }
+}
+
+static inline void row_cmap8_to_565_2x(uint16_t *dst, const uint8_t *src)
+{
+	int x = 0;
+    for (x = 0; x < SRC_W; x++) {
+        uint16_t c = palette565[src[x]];
+        dst[x*2 + 0] = c;
+        dst[x*2 + 1] = c;
     }
 }
 
@@ -143,15 +152,27 @@ void I_UpdateNoBlit(void)
 void I_FinishUpdate(void)
 {
 	int y = 0;
+	
     if (!I_VideoBuffer) return;
     const uint8_t *src = (const uint8_t *)I_VideoBuffer;
     volatile uint16_t *fb = (volatile uint16_t *)(uintptr_t)FBADDR;
+#if SCALE_X2
+    // 640x480: scale 320->640 (2x) and 200->480 (nearest)
     for (y = 0; y < DST_H; y++) {
-        const int sy = ymap[y];
-        const uint8_t *src_row = src + (sy * SRC_W);
-        uint16_t *dst_row = (uint16_t *)(uintptr_t)(fb + (y * DST_W));
-        row_cmap8_to_565(dst_row, src_row);
+        int sy = (y * SRC_H) / DST_H;
+        const uint8_t *src_row = src + sy * SRC_W;
+        uint16_t *dst_row = (uint16_t *)(uintptr_t)(fb + y * DST_W);
+        row_cmap8_to_565_2x(dst_row, src_row);
     }
+#else
+    // 320x240: no horizontal scaling, 200->240 (nearest)
+    for (y = 0; y < DST_H; y++) {
+        int sy = (y * SRC_H) / DST_H;
+        const uint8_t *src_row = src + sy * SRC_W;
+        uint16_t *dst_row = (uint16_t *)(uintptr_t)(fb + y * DST_W);
+        row_cmap8_to_565_1x(dst_row, src_row);
+    }
+#endif
 }
 
 void I_ReadScreen(byte *scr)

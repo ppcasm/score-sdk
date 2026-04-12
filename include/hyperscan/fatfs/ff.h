@@ -45,14 +45,18 @@ typedef unsigned __int64 QWORD;
 #elif (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) || defined(__cplusplus)	/* C99 or later */
 #define FF_INTDEF 2
 //#include <stdint.h>
-
+//#include "score7_constants.h"
 
 typedef unsigned int	UINT;	/* int must be 16-bit or 32-bit */
 typedef unsigned char	BYTE;	/* char must be 8-bit */
-typedef uint16_t		WORD;	/* 16-bit unsigned integer */
-typedef uint32_t		DWORD;	/* 32-bit unsigned integer */
-typedef uint64_t		QWORD;	/* 64-bit unsigned integer */
-typedef WORD			WCHAR;	/* UTF-16 character type */
+typedef unsigned short  WORD;
+typedef unsigned long   DWORD;
+typedef unsigned long long QWORD;
+typedef unsigned short WCHAR;
+//typedef uint16_t		WORD;	/* 16-bit unsigned integer */
+//typedef uint32_t		DWORD;	/* 32-bit unsigned integer */
+//typedef uint64_t		QWORD;	/* 64-bit unsigned integer */
+//typedef WORD			WCHAR;	/* UTF-16 character type */
 
 #else  	/* Earlier than C99 */
 #define FF_INTDEF 1
@@ -423,7 +427,7 @@ void ff_mutex_give (int vol);		/* Unlock sync object */
 #define AM_DIR	0x10	/* Directory */
 #define AM_ARC	0x20	/* Archive */
 
-FATFS fs;
+//FATFS fs;adf
 
 typedef struct {
     FIL file;

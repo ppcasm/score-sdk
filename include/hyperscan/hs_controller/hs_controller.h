@@ -21,7 +21,7 @@ typedef struct{
 	bool rs : 1;
 	bool lt : 1;
 	bool rt : 1;
-	bool reserved : 5;
+	unsigned int reserved : 5;
 	bool y : 1;
 	bool r : 1;
 	bool g : 1;

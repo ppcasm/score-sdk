@@ -6,6 +6,7 @@
 #include "irq/interrupts.h"
 #include "score7_registers.h"
 #include "score7_constants.h"
+#include "hyperscan/hyperscan.h"
 
 // Stupid Framebuffer
 unsigned short *fb = (unsigned short *) 0xA0400000;
@@ -59,8 +60,8 @@ typedef volatile unsigned int U32;
 
 int main()
 {	
-	*P_INT_MASK_CTRL1 = 0xFFFFFFFFu;
-	cache_flush_all();
+	//*P_INT_MASK_CTRL1 = 0xFFFFFFFFu;
+	//cache_flush_all();
 	/*
 	*(volatile uint32_t *)0x88010090 = 0x5A;
 	*(volatile uint32_t *)0x88010080 = 1;
@@ -97,15 +98,32 @@ int main()
     */
 	tv_init(RESOLUTION_640_480, COLOR_RGB565, 0xA0400000, 0xA0400000, 0xA0400000);
 	
-	attach_isr(INT_PPU_VBLANK_START, inc_vblank);
-	attach_isr(INT_TV_VBLANK_START, inc_vblank);
-    enable_isr(INT_PPU_VBLANK_START);
-    enable_isr(INT_PPU_VBLANK_START);
+	//attach_isr(INT_PPU_VBLANK_START, inc_vblank);
+	//attach_isr(INT_TV_VBLANK_START, inc_vblank);
+    //enable_isr(INT_PPU_VBLANK_START);
+    //enable_isr(INT_PPU_VBLANK_START);
     
+    /*
+    
+    unsigned int test = 0;
+    *(volatile unsigned int *)0x88010080 = 0x00000000u;
+    *(volatile unsigned int *)0x88160000 = 0x00000000u;
+    *(volatile unsigned int *)0x88161000 = 0x00000000u;
+    *(volatile unsigned int *)0x88162000 = 0x00000000u;
+    *(volatile unsigned int *)0x88163000 = 0x00000000u;
+    *(volatile unsigned int *)0x88164000 = 0x00000000u;
+    *(volatile unsigned int *)0x88165000 = 0x00000000u;
+    */
     
 	while(1){
-		cache_flush_all();
-		if(vblank) printf("Vblank: %x\n", vblank);
+		//tv_clearscreen(fb);
+		tv_print(fb, 4, 4, "TESTING");
+		tv_printf(fb, 8, 8, 0xFFFF, 0x0000, "%x\n", 0x41414141);
+		//tv_printhex(fb, 4, 4, (*P_USB_GPIO_INPUT >> 8) & 1);
+		//tv_printhex(fb, 4, 4, *P_USBH_D_READBACK);
+		//if(*P_USBH_D_READBACK == 0) tv_printcolor(fb, 10, 10, "YEP", 0xF800);
+		//cache_flush_all();
+		//if(vblank) printf("Vblank: %x\n", vblank);
 		//printf("INT: %x\n", read_cr0_reg());
 		//a = 5 / 0;
 		//sdbbp();g
