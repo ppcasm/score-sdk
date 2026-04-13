@@ -1,0 +1,206 @@
+diff --git a/newlib/Makefile.am b/newlib/Makefile.am
+index 00088b6..5bdc72d 100644
+--- a/newlib/Makefile.am
++++ b/newlib/Makefile.am
+@@ -113,19 +113,19 @@ rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2)$(filter $(subst *
+ # both libc.a and libm.a.  We build them in libm.a and copy them over,
+ # along with some required supporting routines.
+ MATHOBJS_IN_LIBC = \
+-	libm_a-s_fpclassify.o libm_a-sf_fpclassify.o \
+-	libm_a-s_isinf.o libm_a-sf_isinf.o \
+-	libm_a-s_isnan.o libm_a-sf_isnan.o \
+-	libm_a-s_isinfd.o libm_a-sf_isinff.o \
+-	libm_a-s_isnand.o libm_a-sf_isnanf.o \
+-	libm_a-s_nan.o libm_a-sf_nan.o \
+-	libm_a-s_ldexp.o libm_a-sf_ldexp.o \
+-	libm_a-s_frexp.o libm_a-sf_frexp.o libm_a-frexpl.o \
+-	libm_a-s_modf.o \
+-	libm_a-sf_modf.o libm_a-s_scalbn.o \
+-	libm_a-sf_scalbn.o \
+-	libm_a-s_finite.o libm_a-sf_finite.o \
+-	libm_a-s_copysign.o libm_a-sf_copysign.o
++	a-s_fpclassify.o a-sf_fpclassify.o \
++	a-s_isinf.o a-sf_isinf.o \
++	a-s_isnan.o a-sf_isnan.o \
++	a-s_isinfd.o a-sf_isinff.o \
++	a-s_isnand.o a-sf_isnanf.o \
++	a-s_nan.o a-sf_nan.o \
++	a-s_ldexp.o a-sf_ldexp.o \
++	a-s_frexp.o a-sf_frexp.o a-frexpl.o \
++	a-s_modf.o \
++	a-sf_modf.o a-s_scalbn.o \
++	a-sf_scalbn.o \
++	a-s_finite.o a-sf_finite.o \
++	a-s_copysign.o a-sf_copysign.o
+ 
+ ## Place the libm_a objects in libc/ to keep the top dir tidy.
+ stamp-libc-math-objects: libm.a
+diff --git a/newlib/configure.host b/newlib/configure.host
+index 960cca2..e3a9c1f 100644
+--- a/newlib/configure.host
++++ b/newlib/configure.host
+@@ -327,6 +327,9 @@ case "${host_cpu}" in
+   sh | sh64)
+ 	machine_dir=sh
+ 	;;
++  score*)
++	machine_dir=score
++	;;
+   sparc*)
+ 	libm_machine_dir=sparc
+ 	machine_dir=sparc
+@@ -557,6 +560,9 @@ case "${host}" in
+   powerpcle-*-pe)
+ 	posix_dir=posix
+ 	;;
++  score*-*-*)
++	sys_dir=
++	;;
+   sh*-*)
+ 	sys_dir=sh
+ 	;;
+@@ -843,6 +849,10 @@ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVID
+   riscv*-*-*)
+ 	syscall_dir=syscalls
+ 	;;
++  score*-*-*)
++	newlib_cflags="${newlib_cflags} -DMISSING_SYSCALL_NAMES"
++	syscall_dir=
++	;;
+   sh*-*-*)
+ 	default_newlib_io_long_long="yes"
+ 	syscall_dir=syscalls
+diff --git a/newlib/libc/acinclude.m4 b/newlib/libc/acinclude.m4
+index 52a6c57..4451c2d 100644
+--- a/newlib/libc/acinclude.m4
++++ b/newlib/libc/acinclude.m4
+@@ -55,6 +55,7 @@ m4_foreach_w([MACHINE], [
+   or1k
+   powerpc pru
+   riscv rl78 rx
++  score
+   sh sparc spu
+   tic4x tic6x tic80
+   v850 visium
+diff --git a/newlib/libc/include/machine/ieeefp.h b/newlib/libc/include/machine/ieeefp.h
+index c5fafcf..c642d53 100644
+--- a/newlib/libc/include/machine/ieeefp.h
++++ b/newlib/libc/include/machine/ieeefp.h
+@@ -228,6 +228,14 @@
+ #endif
+ #endif
+ 
++#if defined(__score__) || defined(__score)
++# if defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
++#  define __IEEE_BIG_ENDIAN
++# else
++#  define __IEEE_LITTLE_ENDIAN
++# endif
++#endif
++
+ #ifdef __i960__
+ #define __IEEE_LITTLE_ENDIAN
+ #endif
+diff --git a/newlib/libc/include/machine/setjmp.h b/newlib/libc/include/machine/setjmp.h
+index ab820ed..f0a187d 100644
+--- a/newlib/libc/include/machine/setjmp.h
++++ b/newlib/libc/include/machine/setjmp.h
+@@ -172,6 +172,11 @@ _BEGIN_STD_C
+ #define _JBLEN 4
+ #endif
+ 
++#ifdef __score7__
++#define _JBTYPE unsigned long
++#define _JBLEN 14
++#endif
++
+ #ifdef  __sh__
+ #if __SH5__
+ #define _JBLEN 50
+diff --git a/newlib/libc/machine/Makefile.inc b/newlib/libc/machine/Makefile.inc
+index 162be4f..a2a199f 100644
+--- a/newlib/libc/machine/Makefile.inc
++++ b/newlib/libc/machine/Makefile.inc
+@@ -136,6 +136,9 @@ endif
+ if HAVE_LIBC_MACHINE_RX
+ include %D%/rx/Makefile.inc
+ endif
++if HAVE_LIBC_MACHINE_SCORE
++include %D%/score/Makefile.inc
++endif
+ if HAVE_LIBC_MACHINE_SH
+ include %D%/sh/Makefile.inc
+ endif
+diff --git a/newlib/libc/machine/score/Makefile.inc b/newlib/libc/machine/score/Makefile.inc
+new file mode 100644
+index 0000000..f0d38da
+--- /dev/null
++++ b/newlib/libc/machine/score/Makefile.inc
+@@ -0,0 +1 @@
++libc_a_SOURCES += %D%/setjmp.S %D%/longjmp.S
+diff --git a/newlib/libc/machine/score/longjmp.S b/newlib/libc/machine/score/longjmp.S
+new file mode 100644
+index 0000000..e68b713
+--- /dev/null
++++ b/newlib/libc/machine/score/longjmp.S
+@@ -0,0 +1,30 @@
++    .text
++    .align  2
++    .globl  longjmp
++    .type   longjmp, @function
++
++longjmp:
++    lw!     r0, [r4]
++    lw      r1, [r4, 4]
++    lw      r2, [r4, 8]
++    lw      r3, [r4, 12]
++    lw      r12, [r4, 16]
++    lw      r13, [r4, 20]
++    lw      r14, [r4, 24]
++    lw      r15, [r4, 28]
++    lw      r16, [r4, 32]
++    lw      r17, [r4, 36]
++    lw      r18, [r4, 40]
++    lw      r19, [r4, 44]
++    lw      r20, [r4, 48]
++    lw      r21, [r4, 52]
++
++    cmpz.c  r5
++    bne     cplin
++    ldi     r5, 1
++
++cplin:
++    mv!     r4, r5
++    br!     r3
++
++    .size   longjmp, .-longjmp
+diff --git a/newlib/libc/machine/score/setjmp.S b/newlib/libc/machine/score/setjmp.S
+new file mode 100644
+index 0000000..f17f5e0
+--- /dev/null
++++ b/newlib/libc/machine/score/setjmp.S
+@@ -0,0 +1,24 @@
++    .text
++    .align  2
++    .globl  setjmp
++    .type   setjmp, @function
++
++setjmp:
++    sw      r0, [r4, 0]
++    sw      r1, [r4, 4]
++    sw      r2, [r4, 8]
++    sw      r3, [r4, 12]
++    sw      r12, [r4, 16]
++    sw      r13, [r4, 20]
++    sw      r14, [r4, 24]
++    sw      r15, [r4, 28]
++    sw      r16, [r4, 32]
++    sw      r17, [r4, 36]
++    sw      r18, [r4, 40]
++    sw      r19, [r4, 44]
++    sw      r20, [r4, 48]
++    sw      r21, [r4, 52]
++    ldi     r4, 0
++    br!     r3
++
++    .size   setjmp, .-setjmp
